@@ -1,0 +1,88 @@
+- parse errors with bigger index has higher precedence.
+- set parse error to nil when success. check nil when appending.
+- be able to mixin Parsers methods.
+- use *alts instead of alts for PlusParser
+- use "seq" function when it is available. use bind otherwise.
+~ Come up with do notation.
+- longest, shortest, longer, shorter
+- many
+- some
+- separated, separated1
+- delimited, delimited1
+- atom
+- is
+- satisfies
+- repeat
+- use operator "*" for repeat_.
+- look ahead
+- get_index
+- errors could be a tree, instead of linear
+- use Forwardable.def_delegators
+- are
+- string, str
+- char
+- not
+- not_char
+- not_string
+- isnt
+- arent
+- operator |
+- | and >>
+- operator table
+- ~ for isnt
+- among
+- notAmong
+- the first element in the input can be used in the error message as "something encountered".
+- line number and column number should be in error message and exception.
+- change "... encountered" to "... unexpected" for the not methods.
+- expect
+- change "Parser.isnt" to "Parser.not"
+* unicode support
+- print char rather than fixnum in error message
+- support lex/parser phases. token object with raw index is needed.
+- get_index should return index of the current input
+- eof
+- followed, '<<'
+- any
+- repeat_
+- many_
+- some_
+- between. done by >> and <<
+- range
+- detect infinite loop for many
+- detect infinite loop for some
+- word
+- integer
+- number
+- regex
+- token
+- optional
+- | can be used to do 'plus' on values (by calling value implicitly)
+- use singleton Nil instead of value(nil).
+- throwp, catchp
+- use repeat to represent "some".
+- allow optional to take a parameter, which is the default value.
+- string case insensitive.
+- fragment
+- line comment
+- block comment
+* nestable block comment
+- whitespace
+- lexeme
+- create an Operators class where operators that may contain each other can be scanned properly. 
+- lexeme should allow no whitespace before the first element.
+- create a Keywords class that lex and parse keywords. (with good defaulting lexer support)
+- infixl
+- infixr
+- infixn
+- prefix
+- postfix
+- Functors
+? step for logical step instead of physical offset
+- lazy
+? once we have step, change OperatorTable so that operators automatically ignore whitespace (or specified delimiter)
+- peek
+- allow >> to do auto-boxing for parser.
+- nested parser should report "token encountered" instead of "char" encountered.
+- allow (a|b|c) to be treated as sum(a,b,c), avoid nesting.
+* allow (a>>b>>c) to be treated as sequence(a,b,c), avoid nesting.
