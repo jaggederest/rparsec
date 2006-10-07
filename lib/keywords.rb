@@ -1,4 +1,5 @@
-require 'src/parsers'
+require 'parsers'
+
 class Keywords
   extend Parsers
   private_class_method :new

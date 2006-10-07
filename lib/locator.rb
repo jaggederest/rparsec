@@ -1,4 +1,5 @@
-require 'src/misc'
+require 'misc'
+
 class CodeLocator
   def_readable :code
   LF = ?\n

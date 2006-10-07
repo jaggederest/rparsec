@@ -1,7 +1,9 @@
-require 'src/parsers'
-require 'test/src/parser_test'
-require 'src/functors'
-require 'src/expressions'
+require 'import'
+%w{parsers functors expressions}.each do |n|
+  require n
+end
+require 'parser_test'
+
 class ExpressionParserTest < ParserTestCase
   include Functors
   def setup

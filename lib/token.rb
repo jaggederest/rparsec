@@ -1,4 +1,5 @@
-require 'src/misc'
+require 'misc'
+
 
 class Token
   def_readable :kind, :text, :index

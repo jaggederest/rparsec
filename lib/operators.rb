@@ -1,4 +1,5 @@
-require 'src/parsers'
+require 'parsers'
+
 class String
   def starts_with sub
     return true if sub.nil?

@@ -1,9 +1,8 @@
-require 'src/parsers'
-require 'test/src/parser_test'
-require 'src/keywords'
-require 'src/operators'
-require 'src/functors'
-require 'src/expressions'
+require 'import'
+%w{parsers keywords operators functors expressions}.each do |n|
+  require n
+end
+require 'parser_test'
 
 class SimpleParserTest < ParserTestCase
   def calculate_simple_cases(val, cases, default)

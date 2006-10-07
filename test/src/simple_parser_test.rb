@@ -1,5 +1,6 @@
-require 'src/parsers'
-require 'test/src/parser_test'
+require 'import'
+require "parsers"
+require 'parser_test'
 
 class SimpleParserTest < ParserTestCase
   def testValue

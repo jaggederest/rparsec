@@ -1,6 +1,7 @@
-require 'src/parsers'
-require 'test/src/parser_test'
-require 'src/keywords'
+require 'import'
+require 'parsers'
+require 'parser_test'
+require 'keywords'
 class KeywordTestCase < ParserTestCase
   Insensitive = Keywords.case_insensitive(%w{select from where group by order having}){|x|x.downcase}
   Sensitive = Keywords.case_sensitive(%w{new delete if else then void int}){|x|x}

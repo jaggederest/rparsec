@@ -1,4 +1,4 @@
-require 'src/misc'
+require 'misc'
 class ParserException < StandardError
   def_readable :index
 end

@@ -1,11 +1,13 @@
-require 'src/monad'
-require 'src/misc'
-require 'src/error'
-require 'src/context'
-require 'src/locator'
-require 'src/token'
+
+require 'monad'
+require 'misc'
+require 'error'
+require 'context'
+require 'locator'
+require 'token'
 require 'strscan'
-require 'src/functors'
+require 'functors'
+
 class ParserMonad
   def fail msg
     FailureParser.new(msg)

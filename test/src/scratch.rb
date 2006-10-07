@@ -1,7 +1,10 @@
 require 'benchmark'
 require 'strscan'
+
+require 'a'
+puts __FILE__
 str = ''
-N = 10000
+N = 10
 N.times{str << 'abc'}
 
 def scanner

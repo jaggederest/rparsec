@@ -1,6 +1,7 @@
+require 'import'
 require 'runit/testcase'
-require 'src/parsers'
-require 'src/functors'
+require 'parsers'
+require 'functors'
 
 class FunctorTestCase < RUNIT::TestCase
   include Functors

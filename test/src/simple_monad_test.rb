@@ -1,6 +1,7 @@
+require 'import'
 require 'runit/testcase'
-require 'src/id_monad'
-require 'src/monad'
+require 'id_monad'
+require 'monad'
 
 class Idm
   include Monad
