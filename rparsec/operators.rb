@@ -1,4 +1,4 @@
-require 'rparsec/parsers'
+require 'rparsec/parser'
 
 class String
   def starts_with sub

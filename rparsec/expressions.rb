@@ -1,4 +1,4 @@
-require 'rparsec/parsers'
+require 'rparsec/parser'
 
 Associativities = [:prefix, :postfix, :infixn, :infixr, :infixl]
 class OperatorTable
@@ -19,18 +19,17 @@ class OperatorTable
     self
   end
 end
-class Array
-  def to_dict
+
+class Expressions
+  private
+  def self.array_to_dict arr
     result = {}
-    each_with_index do |key,i|
+    arr.each_with_index do |key,i|
       result [key] = i unless result.include? key
     end
     result
   end
-end
-class Expressions
-  private
-  KindPrecedence = Associativities.to_dict
+  KindPrecedence = array_to_dict Associativities
   public
   def self.build(term, table, delim=nil)
     # sort so that higher precedence first.

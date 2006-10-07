@@ -25,8 +25,8 @@ module Functors
   Compare = proc {|x,y|x<=>y}
   Call = proc {|x,y|x.call(y)}
   Feed = proc {|x,y|y.call(x)}
-  Fst = proc {|x,null|x}
-  Snd = proc {|null, x|x}
+  Fst = proc {|x,_|x}
+  Snd = proc {|_, x|x}
   At = proc {|x,y|x[y]}
   To_a = proc {|x|x.to_a}
   To_s = proc {|x|x.to_s}
@@ -34,7 +34,7 @@ module Functors
   To_sym = proc {|x|x.to_sym}
   To_f = proc {|x|x.to_f}
   def const(v)
-    proc {|null|v}
+    proc {|_|v}
   end
   def nth(n)
     proc {|*args|args[n]}
