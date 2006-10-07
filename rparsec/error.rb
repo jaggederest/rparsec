@@ -1,4 +1,4 @@
-require 'misc'
+require 'rparsec/misc'
 class ParserException < StandardError
   def_readable :index
 end

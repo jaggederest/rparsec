@@ -1,4 +1,3 @@
-require 'import'
 %w{
   simple_monad
   functor

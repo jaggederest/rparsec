@@ -1,4 +1,4 @@
-require 'misc'
+require 'rparsec/misc'
 
 class CodeLocator
   def_readable :code

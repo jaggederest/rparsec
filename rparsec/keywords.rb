@@ -1,4 +1,4 @@
-require 'parsers'
+require 'rparsec/parsers'
 
 class Keywords
   extend Parsers

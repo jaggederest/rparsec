@@ -1,7 +1,5 @@
 require 'import'
-%w{parsers functors expressions}.each do |n|
-  require n
-end
+import :parsers, :functors, :expressions
 require 'parser_test'
 
 class ExpressionParserTest < ParserTestCase

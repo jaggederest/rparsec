@@ -1,7 +1,6 @@
 require 'import'
 require 'runit/testcase'
-require 'id_monad'
-require 'monad'
+import :id_monad, :monad
 
 class Idm
   include Monad

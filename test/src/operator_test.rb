@@ -1,7 +1,6 @@
 require 'import'
-require 'parsers'
+import :parsers, :operators
 require 'parser_test'
-require 'operators'
 class OperatorTestCase < ParserTestCase
   Ops = Operators.new(%w{++ + - -- * / ~})
   def verifyToken(src, op)

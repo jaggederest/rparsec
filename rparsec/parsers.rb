@@ -1,12 +1,7 @@
-
-require 'monad'
-require 'misc'
-require 'error'
-require 'context'
-require 'locator'
-require 'token'
+%w{
+monad misc error context locator token functors
+}.each {|lib| require "rparsec/#{lib}"}
 require 'strscan'
-require 'functors'
 
 class ParserMonad
   def fail msg

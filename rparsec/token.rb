@@ -1,4 +1,4 @@
-require 'misc'
+require 'rparsec/misc'
 
 
 class Token

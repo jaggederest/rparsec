@@ -1,7 +1,6 @@
 require 'import'
 require 'rubyunit'
-require 'parsers'
-require 'functors'
+import :parsers, :functors
 # require 'forwardable'
 
 class ParserTestCase < RUNIT::TestCase

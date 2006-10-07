@@ -1,4 +1,4 @@
-require 'parsers'
+require 'rparsec/parsers'
 
 Associativities = [:prefix, :postfix, :infixn, :infixr, :infixl]
 class OperatorTable

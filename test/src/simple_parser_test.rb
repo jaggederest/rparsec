@@ -1,5 +1,5 @@
 require 'import'
-require "parsers"
+import :parsers
 require 'parser_test'
 
 class SimpleParserTest < ParserTestCase
