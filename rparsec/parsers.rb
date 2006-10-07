@@ -241,6 +241,10 @@ class Parser
   alias << followed
   alias * repeat_
   def_sig :plus, Parser
+  private
+  def _parse(ctxt)
+    false
+  end
 end
 
 
