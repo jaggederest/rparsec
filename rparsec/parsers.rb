@@ -18,7 +18,9 @@ class ParserMonad
     PlusParser.new([p1,p2]);
   end
 end
-
+#
+# Represents a parser that parses a certain grammar rule.
+#
 class Parser
   include Functors
   include Monad
@@ -61,6 +63,9 @@ class Parser
     msg << " at line #{line}, col #{col}."
   end
   public
+  #
+  # parses a string
+  #
   def parse(src)
     ctxt = ParseContext.new(src)
     return ctxt.result if _parse ctxt
