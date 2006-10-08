@@ -1,7 +1,14 @@
 require 'rparsec/parser'
 
+#
+# starts_with is too useful to be missed in the standard String class.
+# We add a simple implementation for it.
+#
 class String
-  def starts_with sub
+  #
+  # Do I start with the sub string?
+  # 
+  def starts_with? sub
     return true if sub.nil?
     len = sub.length
     return false if len > length
@@ -12,9 +19,20 @@ class String
   end
 end
 
+#
+# This class helps building lexer and parser for operators.
+# The case that one operator (++ for example) contains another operator (+)
+# is automatically handled so client code don't have to worry about ambiguity.
+# 
 class Operators
-  def initialize(ops)
+  #
+  # To create an instance of Operators for the given operators.
+  # The _block_ parameter, if present, is used to convert the token text to another object
+  # when the token is recognized during grammar parsing phase.
+  #
+  def initialize(ops, &block)
     @lexers = {}
+    @parsers = {}
     sorted = Operators.sort(ops)
     lexers = sorted.map do |op|
       symbol = op.to_sym
@@ -26,17 +44,32 @@ class Operators
       end
       result = result.token(symbol)
       @lexers[symbol] = result
+      @parsers[symbol] = Parsers.token(symbol, &block)
+      result
     end
     @lexer = Parsers.sum(*lexers)
   end
-  def parser(op, &proc)
-    Parsers.token(op.to_sym, &proc)
+  #
+  # Get the parser for the given operator.
+  #
+  def parser(op)
+    result = @parsers[op.to_sym]
+    raise ArgumentError, "parser not found for #{op}" if result.nil?
+    result
   end
   alias [] parser
+  #
+  # Get the lexer that lexes operators.
+  # If an operator is specified, the lexer for that operator is returned.
+  #
   def lexer(op=nil)
     return @lexer if op.nil?
     @lexers[op.to_sym]
   end
+  #
+  # Sort an array of operators so that contained operator appears after containers.
+  # When no containment exist between two operators, the shorter one takes precedence.
+  #
   def self.sort(ops)
     #sort the array by longer-string-first.
     ordered = ops.sort {|x, y|y.length <=> x.length}
@@ -64,7 +97,7 @@ class Operators
     for i in (1..suite.length)
       ind = suite.length - i
       cur = suite[ind]
-      if cur.starts_with s
+      if cur.starts_with? s
         suite.insert(ind+1, s) unless cur == s
         return true
       end

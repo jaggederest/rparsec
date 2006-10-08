@@ -1,6 +1,7 @@
 require 'rparsec/misc'
 
 class CodeLocator
+  extend DefHelper
   def_readable :code
   LF = ?\n
   def locate(ind)

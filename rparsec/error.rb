@@ -1,5 +1,6 @@
 require 'rparsec/misc'
 class ParserException < StandardError
+  extend DefHelper
   def_readable :index
 end
 class Failure

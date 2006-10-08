@@ -1,6 +1,12 @@
 require 'rparsec/parser'
 
 Associativities = [:prefix, :postfix, :infixn, :infixr, :infixl]
+#
+# This class holds information about operator precedences
+# and associativities.
+# prefix, postfix, infixl, infixr, infixn can be called
+# to register operators.
+# 
 class OperatorTable
   attr_reader :operators
   def initialize
@@ -14,13 +20,19 @@ class OperatorTable
     end
   end
   def_operator(*Associativities)
+  private
   def add(*entry)
     @operators << entry
     self
   end
 end
 
-class Expressions
+#
+# This module helps build an expression parser
+# using an OperatorTable instance and a parser
+# that parses the term expression.
+#  
+module Expressions
   private
   def self.array_to_dict arr
     result = {}
@@ -31,6 +43,12 @@ class Expressions
   end
   KindPrecedence = array_to_dict Associativities
   public
+  #
+  # build an expression parser using the given term parser
+  # and operator table.
+  # When _delim_ is specified, patterns recognized by _delim_
+  # is automatically ignored.
+  #
   def self.build(term, table, delim=nil)
     # sort so that higher precedence first.
     apply_operators(term, prepare_suites(table).sort, delim)

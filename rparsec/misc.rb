@@ -1,5 +1,7 @@
-class Module
-  private
+#
+# Helpers for defining ctor.
+#
+module DefHelper
   def def_ctor(*vars)
     define_method(:initialize) do |*params|
       vars.each_with_index do |var, i|
@@ -16,14 +18,6 @@ class Module
   def def_mutable(*vars)
     attr_accessor(*vars)
     def_ctor(*vars)
-  end
-
-  def forward_message(obj, *symbols)
-    symbols.each do |symbol|
-      define_method(symbol) do |*params|
-        obj.__send__(symbol, *params)
-      end
-    end
   end
 end
 

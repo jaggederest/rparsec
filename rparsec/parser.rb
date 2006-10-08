@@ -348,7 +348,7 @@ class Parser
   #
   # a.token(:word_token) will return a Token object when _a_ succeeds.
   # The matched string (or the string returned by _a_, if any) is
-  # encapsulated in the token, together with the _kind_ symbol and
+  # encapsulated in the token, together with the :word_token symbol and
   # the starting index of the match.
   #
   def token(kind)
