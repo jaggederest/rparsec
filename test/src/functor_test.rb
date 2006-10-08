@@ -54,8 +54,8 @@ class FunctorTestCase < RUNIT::TestCase
   end
   def testPower
     double = Mul.curry.call(2)
-    verify(8, double ^ 3, 1)
-    verify(nil, double ^ 0, 1)
+    verify(8, double ** 3, 1)
+    verify(nil, double ** 0, 1)
   end
   def testNth
     verify(2, nth(1), 1, 2, 3)

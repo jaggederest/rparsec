@@ -12,6 +12,7 @@ module Functors
   Mul = proc {|x,y|x*y}
   Div = proc {|x,y|x/y}
   Mod = proc {|x,y|x%y}
+  Power = proc {|x,y|x**y}
   Not = proc {|x,y|!x}
   And = proc {|x,y|x&&y}
   Or = proc {|x,y|x||y}
@@ -153,7 +154,7 @@ module FunctorMixin
       result
     end
   end
-  alias ^ power
+  alias ** power
   private_class_method
   def self.make_curry(arity, &block)
     return block if arity<=1
