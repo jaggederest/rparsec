@@ -7,6 +7,7 @@ module Monad
   # To initialize with a monad implementation and an object that obeys the monad law.
   #
   def initMonad(m, v)
+    raise ArgumentError, 'monad cannot be nil' if m.nil?
     @monad = m;
     @obj = v;
   end

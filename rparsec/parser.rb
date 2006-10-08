@@ -195,7 +195,7 @@ class Parser
   # Return values of self are collected in an array.
   #
   def separated delim
-    separated1(delim) | value([])
+    separated1(delim).plus value([])
   end
   #
   # To create a parser that repeats self for unlimited times,
@@ -205,7 +205,7 @@ class Parser
   # Return values of self are collected in an array.
   #
   def delimited1 delim
-    rest = delim >> (self | Parsers.throwp(:__end_delimiter__))
+    rest = delim >> (self.plus Parsers.throwp(:__end_delimiter__))
     self.bind do |v0|
       result = [v0]
       (rest.map {|v| result << v}).many_.catchp(:__end_delimiter__) >> value(result)
@@ -218,7 +218,7 @@ class Parser
   # Return values of self are collected in an array.
   #
   def delimited delim
-    delimited1(delim) | value([])
+    delimited1(delim).plus value([])
   end
   #
   # String representation
@@ -228,17 +228,17 @@ class Parser
     self.class.to_s
   end
   # 
-  # a | b will run b when a fails (with no input consumption).
+  # a | b will run b when a fails.
   # b is auto-boxed to Parser when it is not of type Parser.
   #
   def | other
-    plus(autobox_parser(other))
+    AltParser.new([self, autobox_parser(other)])
   end
   #
   # a.optional(default) is equivalent to a | default
   #
   def optional(default=nil)
-    plus(value(default))
+    self | value(default)
   end
   #
   # a.catchp(:somesymbol) will catch the :somesymbol thrown by a.
@@ -416,6 +416,14 @@ module Parsers
     PlusParser.new(alts)
   end
   def_sig :sum, [Parser]
+  
+  #
+  # A parser that calls alternative parsers until one succeed.
+  #
+  def alt(*alts)
+    AltParser.new(alts)
+  end
+  def_sig :alt, [Parser]
   #
   # A parser that succeeds when the given predicate returns true
   # (with the current input as the parameter).
@@ -528,8 +536,14 @@ module Parsers
   #
   # A parser that returns the current input index (starting from 0).
   #
-  def index
-    GetIndexParser.new.setName("index")
+  def get_index
+    GetIndexParser.new.setName('get_index')
+  end
+  #
+  # A parser that moves the current input pointer to a certain index.
+  #
+  def set_index ind
+    SetIndexParser.new(ind).setName('set_index')
   end
   #
   # A parser that tries all given alternative parsers

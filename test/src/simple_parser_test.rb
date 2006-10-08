@@ -15,8 +15,8 @@ class SimpleParserTest < ParserTestCase
   def testFailPlusGoodReturnGood
     assertParser('', 2, failure('wrong')|value(2))
   end
-  def testFailPlusFailFailsWithBothErrors
-    assertError('', 'wrong or wrong too', failure('wrong') | failure('wrong too'))
+  def testFailPlusFailFailsWithFirstError
+    assertError('', 'wrong', failure('wrong') | failure('wrong too'))
   end
   def testFailBreaksSeq
     assertError('', 'wrong', failure('wrong') >> value(2))
@@ -80,8 +80,9 @@ class SimpleParserTest < ParserTestCase
     ){|x,y,z| x+y+z}
     assertParser('cba', 3, parser)
   end
-  def testPlusDoesntRecoverInputConsumption
-    assertError('abc', '"bcd" expected', char('a') >> str('bcd') | str('abc'), 1)
+  def testPlusAutomaticallyRecoverInputConsumption
+    # assertError('abc', '"bcd" expected', char('a') >> str('bcd') | str('abc'), 1)
+    assertParser('abc', 'abc', char('a') >> str('bcd') | str('abc'))
   end
   def testLookaheadRecoversInputConsumption
     assertParser('abc', 'abc', (char('x') | char('a') >> str('bcd') | str('abc') | char('x')).lookahead(2))
@@ -91,7 +92,11 @@ class SimpleParserTest < ParserTestCase
     assert_equal([1,3],[line,col])
   end
   def testInputConsumptionBiggerThanLookaheadShouldFail
-    assertError('abc', "'d' expected", (str('ab')>>char('d') | str('abc')).lookahead(2), 2)
+    assertError('abc', "'d' expected", sum(str('ab')>>char('d'), str('abc')).lookahead(2), 2)
+  end
+  
+  def testInputConsumptionDoesNotFailForAlt
+    assertParser('abc', 'abc', alt(str('ab')>>char('d'), str('abc')))
   end
   def testAtomParserIsAlwaysRecoverable
     assertParser('abc', 'abc', (str('ab')>>char('d')).atomize | str('abc'))
@@ -111,7 +116,8 @@ class SimpleParserTest < ParserTestCase
   end
   def testLookeaheadUsedInPlusCanBeUsedByNot
     parser = (char('a') >> str('abc') | char('a') >> str('bcd')).lookahead(2)
-    assertError('abc', '"abc" expected or "bcd" expected', parser, 1)
+    # assertError('abc', '"abc" expected or "bcd" expected', parser, 1)
+    assertError('abc', '"abc" expected', parser, 1)
     assertParser('abc', nil, parser.not)
   end
   def testNotString
@@ -133,7 +139,7 @@ class SimpleParserTest < ParserTestCase
     assertParser('abc', ?a, not_among(?b,?c))
   end
   def testGetIndex
-    assertParser('abc', 1, char('a') >> index)
+    assertParser('abc', 1, char('a') >> get_index)
   end
   def testMultilineErrorMessage
     assertError("ab\nc", "'d' expected", str("ab\nc") >> char(?d), 4, 2, 2)
@@ -235,7 +241,8 @@ class SimpleParserTest < ParserTestCase
   def testOptional
     assertParser('abc', nil, char(?,).optional)
     assertParser('abc', 'xyz', char(?,).optional('xyz'))
-    assertError('abc', "'.' expected", (any.some_(2) >> char(?.)).optional, 2)
+    # assertError('abc', "'.' expected", (any.some_(2) >> char(?.)).optional, 2)
+    assertParser('abc', nil, (any.some_(2) >> char(?.)).optional)
   end
   def testThrowCatch
     assertParser('abc', :hello, (char('a')>>throwp(:hello)).catchp(:hello))
@@ -290,7 +297,7 @@ class SimpleParserTest < ParserTestCase
       token(:word) >> token(:integer), 4)
   end
   def testGetIndexFromGrammar
-    assertGrammar('abc cdef', 1, word.token(:word).many, token(:word) >> index)
+    assertGrammar('abc cdef', 1, word.token(:word).many, token(:word) >> get_index)
   end
   def testWhitespace
     assertParser(' ', ?\s, whitespace)
@@ -355,6 +362,12 @@ class SimpleParserTest < ParserTestCase
     verifyTypeMismatch(:shortest, '2nd', Parser, Fixnum) do
       shortest(char('a'), 1, 2)
     end
+  end
+  def testSetIndex
+    parser = get_index.bind do |ind|
+      char('a') << set_index(ind)
+    end
+    assertParser('abc', [?a,?a,?a], parser.repeat(3))
   end
   def verifyTypeMismatch(mtd, n, expected, actual)
     begin

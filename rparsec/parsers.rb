@@ -27,7 +27,8 @@ def add_error(err, e)
   cmp = compare_error(err, e)
   return err if cmp > 0
   return e if cmp < 0
-  merge_error(err, e)
+  err
+  # merge_error(err, e)
 end
 def get_first_element(err)
   while err.kind_of?(Array)
@@ -174,6 +175,37 @@ class PlusParser < LookAheadSensitiveParser
     PlusParser.new(@alts.dup << other, @lookahead).setName(name)
   end
   def_sig :plus, Parser
+end
+
+
+class AltParser < LookAheadSensitiveParser
+  def initialize(alts, la = 1)
+    super(la)
+    @alts, @lookahead = alts, la
+  end
+  def _parse ctxt
+    ind = ctxt.index
+    result = ctxt.result
+    err = ctxt.error
+    err_ind = -1
+    for p in @alts
+      ctxt.reset_error
+      ctxt.index = ind
+      ctxt.result = result
+      return true if p._parse(ctxt)
+      if ctxt.index > err_ind
+        err, err_ind = ctxt.error, ctxt.index
+      end
+    end
+    ctxt.error = err
+    return false
+  end
+  def withLookahead(n)
+    AltParser.new(@alts, n)
+  end
+  def | other
+    AltParser.new(@alts.dup << autobox_parser(other)).setName(name)
+  end
 end
 
 
@@ -526,6 +558,12 @@ end
 class GetIndexParser < Parser
   def _parse ctxt
     ctxt.retn(ctxt.index)
+  end
+end
+class SetIndexParser < Parser
+  init :index
+  def _parse ctxt
+    ctxt.index = @index
   end
 end
 

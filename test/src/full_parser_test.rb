@@ -86,10 +86,10 @@ class SimpleParserTest < ParserTestCase
   def testFullCaseWhen
       assertParser('3*case when 1==0 and 1==1: 1 when 1==1 : 2 end', 6, parser)
     begin
-      parser.parse('3*case when 1==0 and 1==1: 1 when 1==1 then 2 end')
+      parser.parse('3*case when (1==0 and 1==1): 1 when 1==1 then 2 end')
       fail('should have failed')
       rescue ParserException => e
-        assert(e.message.include?(' then at line 1, col 40'))
+        assert(e.message.include?(' then at line 1, col 42'))
     end
   end
 end

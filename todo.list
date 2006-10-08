@@ -87,3 +87,6 @@
 - allow (a|b|c) to be treated as sum(a,b,c), avoid nesting.
 * allow (a>>b>>c) to be treated as sequence(a,b,c), avoid nesting.
 ? should we do "longest" for "|"? Perf or usability? No.
+- Add AltParser that recovers regardless of input consumption. Change "|" to use AltParser.
+- Add Parsers.alt for AltParser.
+- setIndex
