@@ -2,6 +2,14 @@ require 'import'
 require 'runit/testcase'
 import :parsers, :functors
 
+
+class Proc
+  include FunctorMixin
+end
+class Method
+  include FunctorMixin
+end
+    
 class FunctorTestCase < RUNIT::TestCase
   include Functors
   def verify(expected, f, *args)

@@ -115,9 +115,3 @@ module FunctorMixin
     end
   end
 end
-class Proc
-  include FunctorMixin
-end
-class Method
-  include FunctorMixin
-end
