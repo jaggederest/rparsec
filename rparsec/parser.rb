@@ -418,7 +418,7 @@ module Parsers
   def_sig :sum, [Parser]
   
   #
-  # A parser that calls alternative parsers until one succeed.
+  # A parser that calls alternative parsers until one succeeds.
   #
   def alt(*alts)
     AltParser.new(alts)

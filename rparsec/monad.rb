@@ -2,14 +2,14 @@
 # module for Monad
 #
 module Monad
-  attr_reader :obj
+  attr_reader :this
   #
   # To initialize with a monad implementation and an object that obeys the monad law.
   #
   def initMonad(m, v)
     raise ArgumentError, 'monad cannot be nil' if m.nil?
     @monad = m;
-    @obj = v;
+    @this = v;
   end
   #
   # To create a value based on the monad impl.
@@ -21,7 +21,7 @@ module Monad
   # Run the _bind_ operation on the encapsulated object following the monad law.
   # 
   def bind(&binder)
-    @monad.bind(@obj, &binder)
+    @monad.bind(@this, &binder)
   end
   #
   # Run the _seq_ operation on the encapsulated object following the monad law.
@@ -47,6 +47,6 @@ module Monad
   # Run the _plus_ operation on the encapsulated object following the MonadPlus law.
   # 
   def plus other
-    @monad.mplus(@obj, other.obj)
+    @monad.mplus(@this, other.this)
   end
 end
