@@ -43,11 +43,12 @@ def compare_error(e1, e2)
   return 1 if e1.index > e2.index
   0
 end
-
-def merge_error(e1, e2)
-  return e1 << e2 if e1.kind_of?(Array)
-  [e1,e2]
-end
+###############################################
+#def merge_error(e1, e2)
+#  return e1 << e2 if e1.kind_of?(Array)
+#  [e1,e2]
+#end
+###############################################
 class ThrowParser < Parser
   init :symbol
   def _parse ctxt
