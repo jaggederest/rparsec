@@ -667,6 +667,9 @@ module Parsers
   def lazy(&block)
     LazyParser.new(block)
   end
+  #
+  # characters considered white space.
+  #
   Whitespaces = " \t\r\n"
   private
   def as_regexp ptn
