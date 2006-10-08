@@ -50,7 +50,7 @@ class Parser
   end
   public
   #
-  # parses a string
+  # parses a string.
   #
   def parse(src)
     ctxt = ParseContext.new(src)
@@ -62,29 +62,58 @@ class Parser
         _add_encountered_error(ctxt.to_msg,
            _display_current_input(ctxt.error_input, src, ctxt.index)), src)
   end
+  #
+  # Set name for the parser.
+  # self is returned.
+  #
   def setName(nm)
     @name = nm
     self
   end
+  #
+  # Create a new parser that's atomic.,
+  # meaning that when it fails, input consumption is undone.
+  # 
   def atomize
     AtomParser.new(self).setName(@name)
   end
+  #
+  # Create a new parser that looks at inputs whthout consuming them.
+  # 
   def peek
     PeekParser.new(self).setName(@name)
   end
+  #
+  # To create a new parser that succeed only if self fails.
+  # 
   def not(msg="#{self} unexpected")
     NotParser.new(self, msg)
   end
+  #
+  # To create a parser that does "look ahead" for n inputs.
+  # 
   def lookahead n
     self
   end
+  #
+  # To create a parser that fails with a given error message.
+  # 
   def expect msg
     ExpectParser.new(self, msg)
   end
+  #
+  # a.followed b will sequentially run a and b;
+  # result of a is preserved as the ultimate return value.
+  # 
   def followed(other)
     FollowedParser.new(self, other)
   end
   def_sig :followed, Parser
+  #
+  # To create a parser that repeats self for a minimum _min_ times,
+  # and maximally _max_ times.
+  # Only the return value of the last execution is preserved.
+  # 
   def repeat_(min, max=min)
     return Parsers.failure("min=#{min}, max=#{max}") if min > max
     if(min==max)
@@ -95,6 +124,11 @@ class Parser
       Some_Parser.new(self, min, max)
     end
   end
+  #
+  # To create a parser that repeats self for a minimum _min_ times,
+  # and maximally _max_ times.
+  # All return values are collected in an array.
+  # 
   def repeat(min, max=min)
     return Parsers.failure("min=#{min}, max=#{max}") if min > max
     if(min==max)
@@ -103,18 +137,41 @@ class Parser
       SomeParser.new(self, min, max)
     end
   end
+  # 
+  # To create a parser that repeats self for at least _least_ times.
+  # parser.many_ is equivalent to bnf notation "parser*".
+  # Only the return value of the last execution is preserved.
+  # 
   def many_(least=0)
     Many_Parser.new(self, least)
   end
+  # 
+  # To create a parser that repeats self for at least _least_ times.
+  # All return values are collected in an array.
+  # 
   def many(least=0)
     ManyParser.new(self, least)
   end
+  # 
+  # To create a parser that repeats self for at most _max_ times.
+  # Only the return value of the last execution is preserved.
+  # 
   def some_(max)
     repeat_(0, max)
   end
+  # 
+  # To create a parser that repeats self for at most _max_ times.
+  # All return values are collected in an array.
+  # 
   def some(max)
     repeat(0, max)
   end
+  #
+  # To create a parser that repeats self for unlimited times,
+  # with the pattern recognized by _delim_ as separator that separates each occurrence.
+  # self has to match for at least once.
+  # Return values of self are collected in an array.
+  #
   def separated1 delim
     rest = delim >> self
     self.bind do |v0|
@@ -122,9 +179,21 @@ class Parser
       (rest.map {|v| result << v}).many_ >> value(result)
     end
   end
+  #
+  # To create a parser that repeats self for unlimited times,
+  # with the pattern recognized by _delim_ as separator that separates each occurrence.
+  # Return values of self are collected in an array.
+  #
   def separated delim
     separated1(delim) | value([])
   end
+  #
+  # To create a parser that repeats self for unlimited times,
+  # with the pattern recognized by _delim_ as separator that separates each occurrence
+  # and also possibly ends the pattern.
+  # self has to match for at least once.
+  # Return values of self are collected in an array.
+  #
   def delimited1 delim
     rest = delim >> (self | Parsers.throwp(:__end_delimiter__))
     self.bind do |v0|
@@ -132,44 +201,97 @@ class Parser
       (rest.map {|v| result << v}).many_.catchp(:__end_delimiter__) >> value(result)
     end
   end
+  #
+  # To create a parser that repeats self for unlimited times,
+  # with the pattern recognized by _delim_ as separator that separates each occurrence
+  # and also possibly ends the pattern.
+  # Return values of self are collected in an array.
+  #
   def delimited delim
     delimited1(delim) | value([])
   end
+  #
+  # String representation
+  #
   def to_s
     return name unless name.nil?
     self.class.to_s
   end
+  # 
+  # a | b will run b when a fails (with no input consumption).
+  # b is auto-boxed to Parser when it is not of type Parser.
+  #
   def | other
     plus(autobox_parser(other))
   end
+  #
+  # a.optional(default) is equivalent to a | default
+  #
   def optional(default=nil)
     plus(value(default))
   end
+  #
+  # a.catchp(:somesymbol) will catch the :somesymbol thrown by a.
+  #
   def catchp(symbol)
-    Parsers.catchp(symbol, self)
+    CatchParser.new(symbol, self)
   end
+  #
+  # a.fragment will return the string matched by a.
+  #
   def fragment
     FragmentParser.new(self)
   end
+  #
+  # a.nested b will feed the token array returned by parser a to parser b
+  # for a nested parsing.
+  #
   def nested(parser)
     NestedParser.new(self, parser)
   end
+  #
+  # a.lexeme(delim) will parse _a_ for 0 or more times and ignore all
+  # patterns recognized by _delim_.
+  # Values returned by _a_ are collected in an array.
+  #
   def lexeme(delim = Parsers.whitespaces)
     delim = delim.many_
     delim >> self.delimited(delim)
   end
+  #
+  # For prefix unary operator.
+  # a.prefix op will run parser _op_ for 0 or more times and eventually run parser _a_
+  # for one time.
+  # _op_ should return a Proc that accepts one parameter.
+  # Proc objects returned by _op_ is then fed with the value returned by _a_
+  # from right to left.
+  # The final result is returned as return value.
+  #
   def prefix(op)
     Parsers.sequence(op.many, self) do |funcs, v|
       funcs.reverse_each {|f|v=f.call(v)}
       v
     end
   end
+  #
+  # For postfix unary operator.
+  # a.postfix op will run parser _a_ for once and then _op_ for 0 or more times.
+  # _op_ should return a Proc that accepts one parameter.
+  # Proc objects returned by _op_ is then fed with the value returned by _a_
+  # from left to right.
+  # The final result is returned as return value.
+  #
   def postfix(op)
     Parsers.sequence(self, op.many) do |v, funcs|
       funcs.each{|f|v=f.call(v)}
       v
     end
   end
+  #
+  # For non-associative infix binary operator.
+  # _op_ has to return a Proc that takes two parameters, who
+  # are returned by the _self_ parser as operands.
+  #
   def infixn(op)
     bind do |v1|
       bin = Parsers.sequence(op, self) do |f, v2|
@@ -178,6 +300,11 @@ class Parser
       bin | value(v1)
     end
   end
+  #
+  # For left-associative infix binary operator.
+  # _op_ has to return a Proc that takes two parameters, who
+  # are returned by the _self_ parser as operands.
+  #
   def infixl(op)
     Parsers.sequence(self, _infix_rest(op, self).many) do |v, rests|
       rests.each do |r|
@@ -187,6 +314,11 @@ class Parser
       v
     end
   end
+  #
+  # For right-associative infix binary operator.
+  # _op_ has to return a Proc that takes two parameters, who
+  # are returned by the _self_ parser as operands.
+  #
   def infixr(op)
     Parsers.sequence(self, _infix_rest(op, self).many) do |v, rests|
       if rests.empty?
@@ -203,14 +335,30 @@ class Parser
       end
     end
   end
+  #
+  # a.token(:word_token) will return a Token object when _a_ succeeds.
+  # The matched string (or the string returned by _a_, if any) is
+  # encapsulated in the token, together with the _kind_ symbol and
+  # the starting index of the match.
+  #
   def token(kind)
     TokenParser.new(kind, self)
   end
+  #
+  # a.seq b will sequentially run a then b.
+  # The result of b is preserved as return value.
+  # If a block is associated, values returned by _a_ and _b_
+  # are passed into the block and the return value of
+  # the block is used as the final result of the parser.
+  #
   def seq(other, &block)
     # TypeChecker.check_arg_type Parser, other, :seq
     Parsers.sequence(self, other, &block)
   end
   def_sig :seq, Parser
+  #
+  # Similar to _seq_. _other_ is auto-boxed if it is not of type Parser.
+  #
   def >> (other)
     seq(autobox_parser(other))
   end
@@ -232,39 +380,73 @@ class Parser
     false
   end
 end
-
+#
+# This module provides all out-of-box parser implementations.
+#
 module Parsers
   extend Signature
+  #
+  # A parser that always fails with the given error message.
+  #
   def failure msg
     FailureParser.new(msg)
   end
+  #
+  # A parser that always succeeds with the given return value.
+  #
   def value v
     ValueParser.new(v)
   end
+  #
+  # A parser that calls alternative parsers until one succeed,
+  # or any failure with input consumption beyond the current look-ahead.
+  #
   def sum(*alts)
     # TypeChecker.check_vararg_type Parser, alts, :sum
     PlusParser.new(alts)
   end
   def_sig :sum, [Parser]
-  def satisfies(expected, &proc)
-    SatisfiesParser.new(proc, expected)
+  #
+  # A parser that succeeds when the given predicate returns true
+  # (with the current input as the parameter).
+  # _expected_ is the error message when _pred_ returns false.
+  #
+  def satisfies(expected, &pred)
+    SatisfiesParser.new(pred, expected)
   end
+  #
+  # A parser that succeeds when the the current input is equal to the given value.
+  # _expected_ is the error message when _pred_ returns false.
+  #
   def is(v, expected="#{v} expected")
     satisfies(expected) {|c|c==v}
   end
+  #
+  # A parser that succeeds when the the current input is not equal to the given value.
+  # _expected_ is the error message when _pred_ returns false.
+  #
   def isnt(v, expected="#{v} unexpected")
     satisfies(expected) {|c|c!=v}
   end
+  #
+  # A parser that succeeds when the the current input is among the given values.
+  #
   def among(*vals)
     expected="one of [#{vals.join(', ')}] expected"
     vals = as_list vals
     satisfies(expected) {|c|vals.include? c}
   end
+  #
+  # A parser that succeeds when the the current input is not among the given values.
+  #
   def not_among(*vals)
     expected = "one of [#{vals.join(', ')}] unexpected"
     vals = as_list vals
     satisfies(expected) {|c|!vals.include? c}
   end
+  #
+  # A parser that succeeds when the the current input is the given character.
+  #
   def char(c)
     if c.kind_of? Fixnum
       nm = c.chr
@@ -273,6 +455,9 @@ module Parsers
       is(c[0], "'#{c}' expected").setName(c)
     end
   end
+  #
+  # A parser that succeeds when the the current input is not the given character.
+  #
   def not_char(c)
     if c.kind_of? Fixnum
       nm = c.chr
@@ -282,57 +467,101 @@ module Parsers
     end
   end
   
+  #
+  # A parser that succeeds when there's no input available.
+  #
   def eof(expected="EOF expected")
     EofParser.new(expected).setName('EOF')
   end
+  #
+  # A parser that tries to match the current inputs one by one
+  # with the given values.
+  # It succeeds only when all given values are matched, in which case all the
+  # matched inputs are consumed.
+  #
   def are(vals, expected="#{vals} expected")
     AreParser.new(vals, expected)
   end
+  #
+  # A parser that makes sure that the given values don't match
+  # the current inputs. One input is consumed if it succeeds.
+  #
   def arent(vals, expected="#{vals} unexpected")
     are(vals, '').not(expected) >> any
   end
-  def string(str)
-    are(str, "\"#{str}\" expected").setName(str)
+  #
+  # A parser that matches the given string.
+  #
+  def string(str, msg = "\"#{str}\" expected")
+    are(str, msg).setName(str)
   end
+  #
+  # A parser that makes sure that the current input doesn't match a string.
+  # One character is consumed if it succeeds.
+  #
   def not_string(str, msg="\"#{str}\" unexpected")
     string(str).not(msg) >> any
   end
-  def str(str)
-    string(str)
-  end
+  alias str string
+  #
+  # A parser that sequentially run the given parsers.
+  # The result of the last parser is used as return value.
+  # If a block is given, the results of the parsers are passed
+  # into the block as parameters, and the block return value
+  # is used as result instead.
+  #
   def sequence(*parsers, &proc)
     # TypeChecker.check_vararg_type Parser, parsers, :sequence
     SequenceParser.new(parsers, proc)
   end
   def_sig :sequence, [Parser]
+  #
+  # A parser that returns the current input index (starting from 0).
+  #
   def index
     GetIndexParser.new.setName("index")
   end
+  #
+  # A parser that tries all given alternative parsers
+  # and picks the one with the longest match.
+  #
   def longest(*parsers)
     # TypeChecker.check_vararg_type Parser, parsers, :longest
     BestParser.new(parsers, true)
   end
   def_sig :longest, [Parser]
+  #
+  # A parser that tries all given alternative parsers
+  # and picks the one with the shortest match.
+  #
   def shortest(*parsers)
     # TypeChecker.check_vararg_type Parser, parsers, :shortest
     BestParser.new(parsers, false)
   end
   def_sig :shortest, [Parser]
-  def shorter(*parsers)
-    shortest(*parsers)
-  end
-  def longer(*parsers)
-    longest(*parsers)
-  end
+  alias shorter shortest
+  alias longer longest
+  #
+  # A parser that consumes one input.
+  #
   def any
     AnyParser.new
   end
+  #
+  # A parser that always fails.
+  #
   def zero
     ZeroParser.new
   end
+  #
+  # A parser that always succeeds.
+  #
   def one
     OneParser.new
   end
+  #
+  # A parser that succeeds if the current input is within a certain range.
+  #
   def range(from, to, msg="#{as_char from}..#{as_char to} expected")
     from, to = as_num(from), as_num(to)
     satisfies(msg) {|c| c <= to && c >= from}

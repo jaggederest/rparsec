@@ -239,7 +239,6 @@ class SimpleParserTest < ParserTestCase
   end
   def testThrowCatch
     assertParser('abc', :hello, (char('a')>>throwp(:hello)).catchp(:hello))
-    assertParser('abc', :hello, catchp(:hello, char('a')>>throwp(:hello)))
     assertParser('abc', ?a, char(?a).catchp(:hello))
   end
   def testDelimited1
