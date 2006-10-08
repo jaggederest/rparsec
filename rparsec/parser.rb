@@ -681,11 +681,11 @@ module Parsers
   def lazy(&block)
     LazyParser.new(block)
   end
+  private
   #
   # characters considered white space.
   #
   Whitespaces = " \t\r\n"
-  private
   def as_regexp ptn
     case ptn when String: Regexp.new(ptn) else ptn end
   end
