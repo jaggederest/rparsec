@@ -106,7 +106,7 @@ class ExpressionParserTest < ParserTestCase
       postfix(decrement, 50).
       infixr(rdiv, 40)
     expr = nil
-    term = int | lparen >> lazy{expr} << rparen
+    term = int | char(?() >> lazy{expr} << char(?))
     delim = whitespace.many_
     expr = delim >> Expressions.build(term, ops, delim)
     
