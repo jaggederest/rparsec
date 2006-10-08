@@ -86,3 +86,4 @@
 - nested parser should report "token encountered" instead of "char" encountered.
 - allow (a|b|c) to be treated as sum(a,b,c), avoid nesting.
 * allow (a>>b>>c) to be treated as sequence(a,b,c), avoid nesting.
+? should we do "longest" for "|"? Perf or usability? No.
