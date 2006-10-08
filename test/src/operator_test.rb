@@ -1,10 +1,10 @@
 require 'import'
-import :parsers, :operators
+import :parsers, :operators, :functors
 require 'parser_test'
 class OperatorTestCase < ParserTestCase
-  Ops = Operators.new(%w{++ + - -- * / ~})
+  Ops = Operators.new(%w{++ + - -- * / ~}, &Id)
   def verifyToken(src, op)
-    verifyParser(src, op, Ops.parser(op){|x|x})
+    verifyParser(src, op, Ops[op])
   end
   def verifyParser(src, expected, parser)
     assertParser(src, expected, Ops.lexer.lexeme.nested(parser))
@@ -12,7 +12,7 @@ class OperatorTestCase < ParserTestCase
   def testAll
     verifyToken('++ -', '++')
     verifyParser('++ + -- ++ - +', '-', 
-      (Ops['++']|Ops['--']|Ops['+']).many_ >> Ops.parser('-'){|x|x})
+      (Ops['++']|Ops['--']|Ops['+']).many_ >> Ops['-'])
   end
   def testSort
     assert_equal(%w{+++ ++- ++ + --- -- -}, Operators.sort(%w{++ - + -- +++ ++- ---}))

@@ -213,11 +213,20 @@ class BestParser < Parser
   end
 end
 
-class BoundParser < LookAheadSensitiveParser
+class BoundParser < Parser
   init :parser, :proc
   def _parse ctxt
     return false unless @parser._parse(ctxt)
     @proc.call(ctxt.result)._parse ctxt
+  end
+end
+
+class MapParser < Parser
+  init :parser, :proc
+  def _parse ctxt
+    return false unless @parser._parse(ctxt)
+    ctxt.result = @proc.call(ctxt.result)
+    true
   end
 end
 

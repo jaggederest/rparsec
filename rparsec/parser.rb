@@ -11,6 +11,7 @@ class Parser
   include Functors
   include Monad
   extend Signature
+  extend DefHelper
   MyMonad = ParserMonad.new
   attr_accessor :name
   private
@@ -70,6 +71,15 @@ class Parser
     @name = nm
     self
   end
+  #
+  # a.map{|x|x+1} will first execute parser a, when it succeeds,
+  # the associated block is executed to transform the result to a new value
+  # (increment it in this case).
+  #
+  def map(&block)
+    MapParser.new(self, block)
+  end
+  
   #
   # Create a new parser that's atomic.,
   # meaning that when it fails, input consumption is undone.
@@ -566,27 +576,55 @@ module Parsers
     from, to = as_num(from), as_num(to)
     satisfies(msg) {|c| c <= to && c >= from}
   end
+  #
+  # A parser that throws a symbol.
+  #
   def throwp(symbol)
     ThrowParser.new(symbol)
   end
-  def catchp(symbol, parser)
-    CatchParser.new(symbol, parser)
-  end
+  #
+  # A parser that succeeds if the current inputs match
+  # the given regular expression.
+  # The matched string is consumed and returned as result.
+  #
   def regexp(ptn, expected="/#{ptn.to_s}/ expected")
     RegexpParser.new(as_regexp(ptn), expected).setName(expected)
   end
+  #
+  # A parser that parses a word
+  # (starting with alpha or underscore, followed by 0 or more alpha, number or underscore).
+  # and return the matched word as string.
+  #
   def word(expected='word expected')
     regexp(/[a-zA-Z_]\w*/, expected)
   end
+  #
+  # A parser that parses an integer
+  # and return the matched integer as string.
+  #
   def integer(expected='integer expected')
     regexp(/\d+(?!\w)/, expected)
   end
+  #
+  # A parser that parses a number (integer, or decimal number)
+  # and return the matched number as string.
+  #
   def number(expected='number expected')
     regexp(/\d+(\.\d+)?/, expected)
   end
+  #
+  # A parser that matches the given string, case insensitively.
+  #
   def string_nocase(str, expected="'#{str}' expected")
     StringCaseInsensitiveParser.new(str, expected).setName(str)
   end
+  #
+  # A parser that succeeds when the current input
+  # is a token with the given kind.
+  # If a block is given, the token text is passed to the block
+  # as parameter, and the block return value is used as result.
+  # Otherwise, the token object is used as result.
+  #
   def token(kind, expected="#{kind} expected", &proc)
     recognizer = satisfies(expected) do |tok|
       tok.respond_to? :kind, :text and kind == tok.kind
@@ -594,18 +632,38 @@ module Parsers
     recognizer = recognizer.map{|tok|proc.call(tok.text)} unless proc.nil?
     recognizer
   end
+  #
+  # A parser that parses a white space character.
+  #
   def whitespace(expected="whitespace expected")
     satisfies(expected) {|c| Whitespaces.include? c}
   end
+  #
+  # A parser that parses 1 or more white space characters.
+  #
   def whitespaces(expected="whitespace(s) expected")
     whitespace(expected).many_(1)
   end
+  #
+  # A parser that parses a line started with _start_.
+  # nil is the result.
+  #
   def comment_line start
     string(start) >> not_char(?\n).many_ >> char(?\n).optional >> value(nil)
   end
+  #
+  # A parser that parses a chunk of text started with _open_
+  # and ended by _close_.
+  # nil is the result.
+  #
   def comment_block open, close
     string(open) >> not_string(close).many_ >> string(close) >> value(nil)
   end
+  #
+  # A lazy parser, when executed, calls the given block
+  # to get a parser object and delegate the call to this lazily
+  # instantiated parser.
+  #
   def lazy(&block)
     LazyParser.new(block)
   end

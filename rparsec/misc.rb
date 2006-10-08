@@ -27,6 +27,9 @@ class Module
   end
 end
 
+#
+# To type check method parameters.
+# 
 module TypeChecker
   private
   def nth n
@@ -57,6 +60,9 @@ module TypeChecker
   extend self
 end
 
+#
+# To add declarative signature support.
+# 
 module Signature
   # Signatures = {}
   def def_sig sym, *types
