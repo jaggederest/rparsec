@@ -53,9 +53,8 @@ end
 
 #
 # This module provides instance methods that 
-# for manipulating closures in a functional style.
-# When included in Proc and Method, they get such functional
-# capability immediately.
+# manipulate closures in a functional style.
+# It is typically included in Proc and Method.
 # 
 module FunctorMixin
   #
