@@ -8,6 +8,9 @@ Associativities = [:prefix, :postfix, :infixn, :infixr, :infixl]
 # to register operators.
 # 
 class OperatorTable
+  #
+  # operators attribute is used internally. Do not access it.
+  # 
   attr_reader :operators
   #
   # Re-initialize the operator table.
