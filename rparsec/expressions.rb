@@ -9,9 +9,23 @@ Associativities = [:prefix, :postfix, :infixn, :infixr, :infixl]
 # 
 class OperatorTable
   attr_reader :operators
+  #
+  # Re-initialize the operator table.
+  #
   def reinit
     @operators = []
   end
+  #
+  # To create an OperatorTable instance.
+  # If a block is given, it is invoked to do post-instantiation.
+  # For example:
+  # 
+  # OperatorTable.new do |tbl|
+  #   tbl.infixl(char(?+) >> Plus)
+  #   tbl.infixl(char(?-) >> Minus)
+  #   tbl.prefix(char(?-) >> Neg)
+  # end
+  #
   def self.new
     this = allocate
     this.reinit
@@ -20,6 +34,11 @@ class OperatorTable
     end
     this
   end
+  private
+  #
+  # To define methods for registering operator. 
+  # This is typically used internally. 
+  #
   def self.def_operator(*kinds)
     kinds.each do |kind|
       define_method(kind) do |op, precedence|
@@ -28,7 +47,6 @@ class OperatorTable
     end
   end
   def_operator(*Associativities)
-  private
   def add(*entry)
     @operators << entry
     self
