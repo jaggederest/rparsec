@@ -94,17 +94,18 @@ class ExpressionParserTest < ParserTestCase
   end
   def testExpression
     @use_around = false
-    ops = OperatorTable.new.
-      infixl(plus, 20).
-      infixl(minus, 20).
-      infixl(mul, 40).
-      infixl(space_mul, 40).
-      infixl(div, 40).
-      prefix(negate, 60).
-      prefix(positive, 60).
-      postfix(increment, 50).
-      postfix(decrement, 50).
-      infixr(rdiv, 40)
+    ops = OperatorTable.new do |tbl|
+      tbl.infixl(plus, 20)
+      tbl.infixl(minus, 20)
+      tbl.infixl(mul, 40)
+      tbl.infixl(space_mul, 40)
+      tbl.infixl(div, 40)
+      tbl.prefix(negate, 60)
+      tbl.prefix(positive, 60)
+      tbl.postfix(increment, 50)
+      tbl.postfix(decrement, 50)
+      tbl.infixr(rdiv, 40)
+    end
     expr = nil
     term = int | char(?() >> lazy{expr} << char(?))
     delim = whitespace.many_

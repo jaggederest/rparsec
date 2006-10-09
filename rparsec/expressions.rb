@@ -9,8 +9,16 @@ Associativities = [:prefix, :postfix, :infixn, :infixr, :infixl]
 # 
 class OperatorTable
   attr_reader :operators
-  def initialize
+  def reinit
     @operators = []
+  end
+  def self.new
+    this = allocate
+    this.reinit
+    if block_given?
+      yield this
+    end
+    this
   end
   def self.def_operator(*kinds)
     kinds.each do |kind|
