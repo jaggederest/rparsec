@@ -19,11 +19,3 @@ class SimpleMonadTest < RUNIT::TestCase
     assert 10, Idm.new(10).plus(Idm.new(20))
   end
 end
-
-x , y = 1, 2
-
-def change(x,y)
-  x, y = 3,4
-end
-change(x,y)
-puts x, y
