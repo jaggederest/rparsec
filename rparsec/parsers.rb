@@ -194,7 +194,7 @@ class AltParser < LookAheadSensitiveParser
       ctxt.index = ind
       ctxt.result = result
       return true if p._parse(ctxt)
-      if ctxt.index > err_ind
+      if ctxt.error.index > err_ind
         err, err_ind = ctxt.error, ctxt.index
       end
     end
@@ -229,7 +229,7 @@ class BestParser < Parser
           best_result, best_ind = ctxt.result, now_ind
         end
       elsif best_ind < 0 # no good match found yet.
-        if ctxt.index > err_ind
+        if ctxt.error.index > err_ind
           err_ind = ctxt.index
         end
         err = add_error(err, ctxt.error)
