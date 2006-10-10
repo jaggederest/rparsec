@@ -155,13 +155,10 @@ class PlusParser < LookAheadSensitiveParser
     @alts = alts
   end
   def _parse ctxt
-    ind = ctxt.index
-    result = ctxt.result
-    err = ctxt.error
+    ind, result, err = ctxt.index, ctxt.result, ctxt.error
     for p in @alts
       ctxt.reset_error
-      ctxt.index = ind
-      ctxt.result = result
+      ctxt.index, ctxt.result = ind, result
       return true if p._parse(ctxt)
       return false unless visible(ctxt, ind)
       err = add_error(err, ctxt.error)
@@ -185,20 +182,17 @@ class AltParser < LookAheadSensitiveParser
     @alts, @lookahead = alts, la
   end
   def _parse ctxt
-    ind = ctxt.index
-    result = ctxt.result
-    err = ctxt.error
-    err_ind = -1
+    ind, result, err = ctxt.index, ctxt.result, ctxt.error
+    err_ind, err_pos = -1, -1
     for p in @alts
       ctxt.reset_error
-      ctxt.index = ind
-      ctxt.result = result
+      ctxt.index, ctxt.result = ind, result
       return true if p._parse(ctxt)
-      if ctxt.error.index > err_ind
-        err, err_ind = ctxt.error, ctxt.index
+      if ctxt.error.index > err_pos
+        err, err_ind, err_pos = ctxt.error, ctxt.index, ctxt.error.index
       end
     end
-    ctxt.error = err
+    ctxt.index, ctxt.error = err_ind, err
     return false
   end
   def withLookahead(n)
@@ -214,23 +208,19 @@ class BestParser < Parser
   init :alts, :longer
   def _parse ctxt
     best_result, best_ind = nil, -1
-    err_ind = -1
-    ind = ctxt.index
-    result = ctxt.result
-    err = ctxt.error
+    err_ind, err_pos = -1, -1
+    ind, result, err = ctxt.index, ctxt.result, ctxt.error
     for p in @alts
       ctxt.reset_error
-      ctxt.index = ind
-      ctxt.result = result
+      ctxt.index, ctxt.result = ind, result
       if p._parse(ctxt)
-        err = nil
-        now_ind = ctxt.index
+        err, now_ind = nil, ctxt.index
         if best_ind==-1 || now_ind != best_ind && @longer == (now_ind>best_ind)
           best_result, best_ind = ctxt.result, now_ind
         end
       elsif best_ind < 0 # no good match found yet.
-        if ctxt.error.index > err_ind
-          err_ind = ctxt.index
+        if ctxt.error.index > err_pos
+          err_ind, err_pos = ctxt.index, ctxt.error.index
         end
         err = add_error(err, ctxt.error)
       end
@@ -239,8 +229,7 @@ class BestParser < Parser
       ctxt.index = best_ind
       return ctxt.retn(best_result)
     else
-      ctxt.error = err
-      ctxt.index = err_ind
+      ctxt.error, ctxt.index = err, err_ind
       return false
     end
   end
