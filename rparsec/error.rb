@@ -8,6 +8,7 @@ class Failure
     @index, @input, @msg = ind, input, msg
   end
   attr_reader :index, :input
+  attr_writer :index
   def msg
     return @msg.to_s
   end

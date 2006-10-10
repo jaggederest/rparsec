@@ -46,7 +46,7 @@ class Parser
     "#{result}#{encountered}"
   end
   def _add_location_to_error(locator, ctxt, msg, code)
-    line, col = locator.locate(ctxt.index)
+    line, col = locator.locate(ctxt.error.index)
     msg << " at line #{line}, col #{col}."
   end
   public
@@ -58,7 +58,7 @@ class Parser
     return ctxt.result if _parse ctxt
     ctxt.prepare_error
     locator = CodeLocator.new(src)
-    raise ParserException.new(ctxt.index), 
+    raise ParserException.new(ctxt.error.index), 
       _add_location_to_error(locator, ctxt, 
         _add_encountered_error(ctxt.to_msg,
            _display_current_input(ctxt.error_input, src, ctxt.index)), src)

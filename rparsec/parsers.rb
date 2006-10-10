@@ -407,6 +407,7 @@ class NestedParser < Parser
       return true if _run_parser parser, ctxt, new_ctxt
       ctxt.index = ind unless new_ctxt.eof
     end
+    ctxt.error.index = ctxt.index
     false
   end
   def _get_index ctxt

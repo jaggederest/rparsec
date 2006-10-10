@@ -81,8 +81,9 @@ class SimpleParserTest < ParserTestCase
     assertParser('cba', 3, parser)
   end
   def testPlusAutomaticallyRecoverInputConsumption
-    # assertError('abc', '"bcd" expected', char('a') >> str('bcd') | str('abc'), 1)
+    assertError('abc', '"bcd" expected', char('a') >> str('bcd').plus(str('abc')), 1)
     assertParser('abc', 'abc', char('a') >> str('bcd') | str('abc'))
+    assertError('abc', "'d' expected", char('a') >> char(?b) >> char(?d) | char(?a) >> char(?c) | str('abd'), 2)
   end
   def testLookaheadRecoversInputConsumption
     assertParser('abc', 'abc', (char('x') | char('a') >> str('bcd') | str('abc') | char('x')).lookahead(2))
