@@ -242,8 +242,8 @@ class SimpleParserTest < ParserTestCase
   def testOptional
     assertParser('abc', nil, char(?,).optional)
     assertParser('abc', 'xyz', char(?,).optional('xyz'))
-    # assertError('abc', "'.' expected", (any.some_(2) >> char(?.)).optional, 2)
-    assertParser('abc', nil, (any.some_(2) >> char(?.)).optional)
+    assertError('abc', "'.' expected", (any.some_(2) >> char(?.)).optional, 2)
+    # assertParser('abc', nil, (any.some_(2) >> char(?.)).optional)
   end
   def testThrowCatch
     assertParser('abc', :hello, (char('a')>>throwp(:hello)).catchp(:hello))

@@ -2,7 +2,7 @@ require 'import'
 import :parsers, :keywords, :operators, :functors, :expressions
 require 'parser_test'
 
-class SimpleParserTest < ParserTestCase
+class FullParserTest < ParserTestCase
   def calculate_simple_cases(val, cases, default)
     cases.each do |cond, consequence|
       # cond, consequence = *cs

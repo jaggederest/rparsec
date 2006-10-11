@@ -394,6 +394,7 @@ class NestedParser < Parser
   private
   def _run_nested(start, ctxt, src, parser)
     ctxt.error = nil
+    new_ctxt = nil
     if src.kind_of? String
       new_ctxt = ParseContext.new(src)
       return true if _run_parser parser, ctxt, new_ctxt

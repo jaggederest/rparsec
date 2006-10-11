@@ -61,7 +61,7 @@ class Parser
     raise ParserException.new(ctxt.error.index), 
       _add_location_to_error(locator, ctxt, 
         _add_encountered_error(ctxt.to_msg,
-           _display_current_input(ctxt.error_input, src, ctxt.index)), src)
+           _display_current_input(ctxt.error.input, src, ctxt.index)), src)
   end
   #
   # Set name for the parser.
@@ -235,10 +235,10 @@ class Parser
     AltParser.new([self, autobox_parser(other)])
   end
   #
-  # a.optional(default) is equivalent to a | default
+  # a.optional(default) is equivalent to a.plus(value(default))
   #
   def optional(default=nil)
-    self | value(default)
+    self.plus(value(default))
   end
   #
   # a.catchp(:somesymbol) will catch the :somesymbol thrown by a.
