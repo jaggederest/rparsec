@@ -106,10 +106,9 @@ module FunctorMixin
   end
   #
   # Uncurry a curried closure.
-  # arity needs to be specified when treating a Method as proc as arity can be unknown.
   #
-  def uncurry(ary=arity)
-    return self unless ary == 1
+  def uncurry
+    return self unless arity == 1
     proc do |*args|
       result = self
       args.each do |a|
@@ -120,10 +119,9 @@ module FunctorMixin
   end
   #
   # Uncurry a reverse curried closure.
-  # arity needs to be specified when treating a Method as proc as arity can be unknown.
   # 
-  def reverse_uncurry(ary=arity)
-    return self unless ary == 1
+  def reverse_uncurry
+    return self unless arity == 1
     proc do |*args|
       result = self
       args.reverse_each do |a|
