@@ -1,0 +1,8 @@
+* test sql-like syntax.
+- test simple expression
+- test expression with bool
+* test simple relation
+* in, not in, between, not between
+* exists, not exists
+* group compare
+* union

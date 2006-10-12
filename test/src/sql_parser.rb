@@ -40,6 +40,11 @@ module SqlParser
       token(:word, &block)
     end
   end 
+  def paren parser
+    operator['('] >> parser << operator[')']
+  end
+  
+  ###################################predicate parser#############################
   def calculate_simple_cases(val, cases, default)
     SimpleCaseExpr.new(val, cases, default)
   end
@@ -123,9 +128,8 @@ module SqlParser
     variant2 = keyword[:between] >> sequence(expr, keyword[:and] >> expr, &maker)
     variant1 | variant2
   end
-  def paren parser
-    operator['('] >> parser << operator[')']
-  end
+  
+  ################################expression parser###############################
   def make_expression predicate, rel
     expr = nil
     lazy_expr = lazy{expr}
@@ -159,6 +163,8 @@ module SqlParser
       prefix(operator['-'] >> Neg, 50)
     expr = Expressions.build(term, table)
   end
+  
+  ################################relation parser###############################
   def make_relation expr, pred
     exprs = expr.delimited1(comma)
     relation = nil
@@ -167,7 +173,7 @@ module SqlParser
     sub_relation = sequence(term_relation, (keyword[:as].optional >> word).optional) do |rel, name|
       case when name.nil?: rel else AliasRelation.new(rel, name) end
     end
-    joined_relation = sub_relation.postfix(make_join_with(lazy{joined_relation}, pred))
+    joined_relation = sub_relation.postfix(join_maker(lazy{joined_relation}, pred))
     where_clause = keyword[:where] >> pred
     order_element = sequence(expr, (keyword[:asc] >> true | keyword[:desc] >> false).optional(true)) do |e,order|
       OrderElement.new e, order
@@ -192,7 +198,7 @@ module SqlParser
       proc {|r1, r2|UnionRelation.new(r1, all, r2)}
     end
   end
-  def make_join_with rel, pred
+  def join_maker rel, pred
     crossjoin = keyword[:cross] >> keyword[:join] >> rel.map do |r|
       proc {|r0| CrossJoinRelation.new(r0, r)}
     end
@@ -209,6 +215,9 @@ module SqlParser
     keyword[kind] >> keyword[:outer].optional >> keyword[:join] >> kind
   end
   
+  
+  
+  ##########################put together###############################
   def expression
     assemble[0]
   end
