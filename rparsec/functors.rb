@@ -109,7 +109,6 @@ module FunctorMixin
   # arity needs to be specified when treating a Method as proc as arity can be unknown.
   #
   def uncurry(ary=arity)
-    fail "cannot uncurry for unknown arity" if ary<0
     return self unless ary == 1
     proc do |*args|
       result = self
@@ -124,7 +123,6 @@ module FunctorMixin
   # arity needs to be specified when treating a Method as proc as arity can be unknown.
   # 
   def reverse_uncurry(ary=arity)
-    fail "cannot uncurry for unknown arity" if ary<0
     return self unless ary == 1
     proc do |*args|
       result = self
