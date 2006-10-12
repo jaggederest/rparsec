@@ -216,6 +216,7 @@ module SqlParser
     end
     leftjoin = outer_join :left
     rightjoin = outer_join :right
+    fulljoin = outer_join :full
     innerjoin = keyword[:inner].optional >> keyword[:join] >> :inner
     join_with_condition = sequence(sum(leftjoin, rightjoin, innerjoin), rel, 
       keyword[:on], pred) do |kind, r, _, on|
