@@ -31,7 +31,7 @@ module SqlParser
   MyLexeme = MyLexer.lexeme(whitespaces | comment_line('#')) << eof
   
   
-  #########################################utilities#########################################
+  ######################################### utilities #########################################
   def keyword
     MyKeywords
   end
@@ -55,7 +55,7 @@ module SqlParser
     operator['('] >> parser << operator[')']
   end
   
-  ###################################predicate parser#############################
+  ################################### predicate parser #############################
   def calculate_simple_cases(val, cases, default)
     SimpleCaseExpr.new(val, cases, default)
   end
@@ -137,7 +137,7 @@ module SqlParser
     variant1 | variant2
   end
   
-  ################################expression parser###############################
+  ################################ expression parser ###############################
   def make_expression predicate, rel
     expr = nil
     lazy_expr = lazy{expr}
@@ -172,7 +172,7 @@ module SqlParser
     expr = Expressions.build(term, table)
   end
   
-  ################################relation parser###############################
+  ################################ relation parser ###############################
   def make_relation expr, pred
     exprs = expr.delimited1(comma)
     relation = nil
@@ -230,7 +230,7 @@ module SqlParser
   
   
   
-  ##########################put together###############################
+  ########################## put together ###############################
   def expression
     assemble[0]
   end
