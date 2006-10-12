@@ -7,6 +7,7 @@
   expression
   s_expression
   full_parser
+  sql
 }.each do |name|
   require "#{name}_test"
 end

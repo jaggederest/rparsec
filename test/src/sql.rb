@@ -30,6 +30,12 @@ class LiteralExpr < Expr
     @lit.to_s
   end
 end
+class VarExpr < Expr
+  def_readable :name
+  def to_s
+    "$#{name}"
+  end
+end
 class WordExpr < Expr
   def_readable :name
   def to_s
@@ -97,7 +103,10 @@ end
 class ComparePredicate < Predicate
   def_readable :left, :op, :right
   def to_s
-    "#{left} #{op} #{right}"
+    "#{left} #{op_name} #{right}"
+  end
+  def op_name
+    case op when :"!=": "<>" else op.to_s end
   end
 end
 class CompoundPredicate < Predicate
@@ -223,6 +232,12 @@ class SelectRelation < Relation
   end
   def as_inner
     "(#{self})"
+  end
+end
+class LimitRelation < Relation
+  def_readable :rel, :limit
+  def to_s
+    "#{rel} limit #{limit}"
   end
 end
 class JoinRelation < Relation

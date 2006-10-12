@@ -4,10 +4,11 @@ import :parsers, :keywords, :operators, :functors, :expressions
 module SqlParser
   include Functors
   include Parsers
+  extend Parsers
   MyKeywords = Keywords.case_insensitive(%w{
     select from where group by having order desc asc
     inner left right full outer inner join on cross
-    union all distinct as exists in between
+    union all distinct as exists in between limit
     case when else end and or not true false
   })
   MyOperators = Operators.new(%w{+ - * / % = > < >= <= <> != : ( ) . ,})
@@ -16,11 +17,21 @@ module SqlParser
     ops.each do |op|
       result << (MyOperators[op] >> op.to_sym)
     end
-    Parsers.sum(*result)
+    sum(*result)
   end
   Comparators = operators(*%w{= > < >= <= <> !=})
-  MyLexer = Parsers.integer.token(:int) | MyKeywords.lexer | MyOperators.lexer
-  MyLexeme = MyLexer.lexeme(Parsers.whitespaces | Parsers.comment_line('#')) << Parsers.eof
+  StringLiteral = (char(?') >> (not_char(?')|str("''")).many_.fragment << char(?')).
+    map do |raw|
+      raw.gsub!(/''/,"'")
+    end
+  QuotedName = char(?[) >> not_char(?]).many_.fragment << char(?])
+  Variable = char(?$) >> word
+  MyLexer = number.token(:number) | StringLiteral.token(:string) | Variable.token(:var) | QuotedName.token(:word) |
+    MyKeywords.lexer | MyOperators.lexer
+  MyLexeme = MyLexer.lexeme(whitespaces | comment_line('#')) << eof
+  
+  
+  #########################################utilities#########################################
   def keyword
     MyKeywords
   end
@@ -40,6 +51,11 @@ module SqlParser
       token(:word, &block)
     end
   end 
+  def paren parser
+    operator['('] >> parser << operator[')']
+  end
+  
+  ###################################predicate parser#############################
   def calculate_simple_cases(val, cases, default)
     SimpleCaseExpr.new(val, cases, default)
   end
@@ -49,7 +65,6 @@ module SqlParser
   def logical_operator op
     proc{|a,b|CompoundPredicate.new(a,op,b)}
   end
-  NotEqual = proc {|x,y|ComparePredicate.new(x,:'<>',y)}
   def make_predicate expr, rel
     expr_list = list expr
     comparison = make_comparison_predicate expr, rel
@@ -104,10 +119,8 @@ module SqlParser
     keyword[:not] >> make_between_clause(val, expr) {|a,b|NotBetweenPredicate.new val, a, b}
   end
   def make_comparison_predicate expr, rel
-    compare = operator['>'] >> Gt | operator['<'] >> Lt | operator['>='] >> Ge | operator['<='] >> Le |
-      operator['='] >> Eq | operator['!='] >> NotEqual | operator['<>'] >> NotEqual
     expr.bind do |val1|
-      comparison = sequence(compare, expr) {|f,e2|f.call(val1,e2)}
+      comparison = sequence(Comparators, expr) {|op,e2|ComparePredicate.new(val1, op, e2)}
       in_clause = make_in val1, expr
       not_in_clause = make_not_in val1, expr
       in_relation = make_in_relation val1, rel
@@ -123,9 +136,8 @@ module SqlParser
     variant2 = keyword[:between] >> sequence(expr, keyword[:and] >> expr, &maker)
     variant1 | variant2
   end
-  def paren parser
-    operator['('] >> parser << operator[')']
-  end
+  
+  ################################expression parser###############################
   def make_expression predicate, rel
     expr = nil
     lazy_expr = lazy{expr}
@@ -145,7 +157,7 @@ module SqlParser
     end
     case_expr = keyword[:case] >> (simple_when_then | full_when_then)
     wildcard = operator[:*] >> WildcardExpr::Instance
-    lit = token(:int) {|l|LiteralExpr.new l}
+    lit = token(:number, :string){|l|LiteralExpr.new l} | token(:var){|name|VarExpr.new name}
     atom = lit | wildcard |
       sequence(word, operator['.'], word|wildcard) {|owner, _, col| QualifiedColumnExpr.new owner, col} |
       word {|w|WordExpr.new w}
@@ -159,6 +171,8 @@ module SqlParser
       prefix(operator['-'] >> Neg, 50)
     expr = Expressions.build(term, table)
   end
+  
+  ################################relation parser###############################
   def make_relation expr, pred
     exprs = expr.delimited1(comma)
     relation = nil
@@ -179,11 +193,15 @@ module SqlParser
     group_by_clause = sequence(group_by, (keyword[:having] >> pred).optional) do |by, having|
       GroupByClause.new(by, having)
     end
-    relation = sub_relation | sequence(keyword[:select], keyword[:distinct].optional(false), exprs, 
+    relation = sub_relation | sequence(keyword[:select], 
+      keyword[:distinct].optional(false), exprs, 
       keyword[:from], joined_relation,
       where_clause.optional, group_by_clause.optional, order_by_clause.optional
     ) do |_, distinct, projected, _, from, where, groupby, orderby|
       SelectRelation.new(projected, distinct, from, where, groupby, orderby)
+    end
+    relation = sequence(relation, (keyword[:limit] >> token(:number, &To_i)).optional) do |rel, limit|
+      case when limit.nil?: rel else LimitRelation.new(rel, limit) end
     end
     relation = relation.infixl(union_maker)
   end
@@ -209,6 +227,9 @@ module SqlParser
     keyword[kind] >> keyword[:outer].optional >> keyword[:join] >> kind
   end
   
+  
+  
+  ##########################put together###############################
   def expression
     assemble[0]
   end
