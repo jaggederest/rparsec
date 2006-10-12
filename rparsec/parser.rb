@@ -634,14 +634,23 @@ module Parsers
   end
   #
   # A parser that succeeds when the current input
-  # is a token with the given kind.
+  # is a token with one of the the given token kinds.
   # If a block is given, the token text is passed to the block
   # as parameter, and the block return value is used as result.
   # Otherwise, the token object is used as result.
   #
-  def token(kind, expected="#{kind} expected", &proc)
-    recognizer = satisfies(expected) do |tok|
-      tok.respond_to? :kind, :text and kind == tok.kind
+  def token(*kinds, &proc)
+    expected="#{kinds.join(' or ')} expected"
+    recognizer = nil
+    if kinds.length==1
+      kind = kinds[0]
+      recognizer = satisfies(expected) do |tok|
+        tok.respond_to? :kind, :text and kind == tok.kind
+      end
+    else
+      recognizer = satisfies(expected) do |tok|
+        tok.respond_to? :kind, :text and kinds.include? tok.kind
+      end
     end
     recognizer = recognizer.map{|tok|proc.call(tok.text)} unless proc.nil?
     recognizer
