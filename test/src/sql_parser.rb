@@ -40,11 +40,6 @@ module SqlParser
       token(:word, &block)
     end
   end 
-  def paren parser
-    operator['('] >> parser << operator[')']
-  end
-  
-  ###################################predicate parser#############################
   def calculate_simple_cases(val, cases, default)
     SimpleCaseExpr.new(val, cases, default)
   end
@@ -128,8 +123,9 @@ module SqlParser
     variant2 = keyword[:between] >> sequence(expr, keyword[:and] >> expr, &maker)
     variant1 | variant2
   end
-  
-  ################################expression parser###############################
+  def paren parser
+    operator['('] >> parser << operator[')']
+  end
   def make_expression predicate, rel
     expr = nil
     lazy_expr = lazy{expr}
@@ -163,8 +159,6 @@ module SqlParser
       prefix(operator['-'] >> Neg, 50)
     expr = Expressions.build(term, table)
   end
-  
-  ################################relation parser###############################
   def make_relation expr, pred
     exprs = expr.delimited1(comma)
     relation = nil
@@ -215,9 +209,6 @@ module SqlParser
     keyword[kind] >> keyword[:outer].optional >> keyword[:join] >> kind
   end
   
-  
-  
-  ##########################put together###############################
   def expression
     assemble[0]
   end
