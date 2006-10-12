@@ -252,6 +252,15 @@ class MapParser < Parser
   end
 end
 
+class MapnParser < Parser
+  init :parser, :proc
+  def _parse ctxt
+    return false unless @parser._parse(ctxt)
+    ctxt.result = @proc.call(*ctxt.result)
+    true
+  end
+end
+
 class SequenceParser < Parser
   init :parsers, :proc
   def _parse ctxt

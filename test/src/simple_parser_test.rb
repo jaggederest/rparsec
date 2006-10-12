@@ -370,6 +370,9 @@ class SimpleParserTest < ParserTestCase
     end
     assertParser('abc', [?a,?a,?a], parser.repeat(3))
   end
+  def testMapn
+    assertParser('abc', ?b, any.repeat(3).mapn{|a,b,c|c-b+a})
+  end
   def verifyTypeMismatch(mtd, n, expected, actual)
     begin
       yield

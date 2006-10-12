@@ -9,3 +9,4 @@
 - limit n
 - string literal
 - var
+- avoid bind for comparisons. Use sequence with lambda.

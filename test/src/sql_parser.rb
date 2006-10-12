@@ -1,6 +1,11 @@
 require 'import'
 import :parsers, :keywords, :operators, :functors, :expressions
-
+class Method
+  include FunctorMixin
+end
+class Proc
+  include FunctorMixin
+end
 module SqlParser
   include Functors
   include Parsers
@@ -54,7 +59,12 @@ module SqlParser
   def paren parser
     operator['('] >> parser << operator[')']
   end
-  
+  def ctor cls
+    cls.method :new
+  end
+  def rctor cls, arity=2
+    ctor(cls).reverse_curry arity
+  end
   ################################### predicate parser #############################
   def calculate_simple_cases(val, cases, default)
     SimpleCaseExpr.new(val, cases, default)
@@ -68,9 +78,7 @@ module SqlParser
   def make_predicate expr, rel
     expr_list = list expr
     comparison = make_comparison_predicate expr, rel
-    group_comparison = sequence(expr_list, Comparators, expr_list) do |g1, op, g2|
-      GroupComparisonPredicate.new(g1, op, g2)
-    end
+    group_comparison = sequence(expr_list, Comparators, expr_list, &ctor(GroupComparisonPredicate))
     bool = nil
     lazy_bool = lazy{bool}
     bool_term = keyword[:true] >> true | keyword[:false] >> false |
@@ -79,61 +87,53 @@ module SqlParser
     bool_table = OperatorTable.new.
       infixl(keyword[:or] >> logical_operator(:or), 20).
       infixl(keyword[:and] >> logical_operator(:and), 30).
-      prefix(keyword[:not] >> proc{|pred|NotPredicate.new(pred)}, 40)
+      prefix(keyword[:not] >> ctor(NotPredicate), 40)
     bool = Expressions.build(bool_term, bool_table)
   end
   def make_exists rel
-    keyword[:exists] >> rel.map do |r|
-      ExistsPredicate.new r
-    end
+    keyword[:exists] >> rel.map(&ctor(ExistsPredicate))
   end
   def make_not_exists rel
-    keyword[:not] >> keyword[:exists] >> rel.map do |r|
-      NotExistsPredicate.new r
-    end
+    keyword[:not] >> keyword[:exists] >> rel.map(&ctor(NotExistsPredicate))
   end
-  def make_in val, expr
-    keyword[:in] >> list(expr).map do |vals|
-      InPredicate.new(val, vals)
-    end 
+  def make_in expr
+    keyword[:in] >> list(expr).map(&rctor(InPredicate))
   end
-  def make_not_in val, expr
-    keyword[:not] >> keyword[:in] >> list(expr).map do |vals|
-      NotInPredicate.new(val, vals)
-    end 
+  def make_not_in expr
+    keyword[:not] >> keyword[:in] >> list(expr).map(&rctor(NotInPredicate))
   end
-  def make_in_relation val, rel
-    keyword[:in] >> rel.map do |r|
-      InRelationPredicate.new(val, r)
-    end
+  def make_in_relation rel
+    keyword[:in] >> rel.map(&rctor(InRelationPredicate))
   end
-  def make_not_in_relation val, rel
-    keyword[:not] >> keyword[:in] >> rel.map do |r|
-      NotInRelationPredicate.new(val, r)
-    end
+  def make_not_in_relation rel
+    keyword[:not] >> keyword[:in] >> rel.map(&rctor(NotInRelationPredicate))
   end
-  def make_between val, expr
-    make_between_clause(val, expr) {|a,b|BetweenPredicate.new val, a, b}
+  def make_between expr
+    make_between_clause(expr, &ctor(BetweenPredicate))
   end
-  def make_not_between val, expr
-    keyword[:not] >> make_between_clause(val, expr) {|a,b|NotBetweenPredicate.new val, a, b}
+  def make_not_between expr
+    keyword[:not] >> make_between_clause(expr, &ctor(NotBetweenPredicate))
   end
   def make_comparison_predicate expr, rel
-    expr.bind do |val1|
-      comparison = sequence(Comparators, expr) {|op,e2|ComparePredicate.new(val1, op, e2)}
-      in_clause = make_in val1, expr
-      not_in_clause = make_not_in val1, expr
-      in_relation = make_in_relation val1, rel
-      not_in_relation = make_not_in_relation val1, rel
-      between = make_between val1, expr
-      not_between = make_not_between val1, expr
-      comparison | in_clause | not_in_clause |
-        in_relation | not_in_relation | between | not_between
+    comparison = sequence(Comparators, expr) do |op,e2|
+      proc{|val1|ComparePredicate.new(val1, op, e2)}
     end
+    in_clause = make_in expr
+    not_in_clause = make_not_in expr
+    in_relation = make_in_relation rel
+    not_in_relation = make_not_in_relation rel
+    between = make_between expr
+    not_between = make_not_between expr
+    compare_with = comparison | in_clause | not_in_clause |
+        in_relation | not_in_relation | between | not_between
+    sequence(expr, compare_with, &Feed)
   end
-  def make_between_clause val, expr, &maker
-    variant1 = keyword[:between] >> paren(sequence(expr, comma >> expr, &maker))
-    variant2 = keyword[:between] >> sequence(expr, keyword[:and] >> expr, &maker)
+  def make_between_clause expr, &maker
+    factory = proc do |a,_,b|
+      proc {|v|maker.call(v,a,b)}
+    end
+    variant1 = keyword[:between] >> paren(sequence(expr, comma, expr, &factory))
+    variant2 = keyword[:between] >> sequence(expr, keyword[:and], expr, &factory)
     variant1 | variant2
   end
   
@@ -141,26 +141,26 @@ module SqlParser
   def make_expression predicate, rel
     expr = nil
     lazy_expr = lazy{expr}
-    simple_case = sequence(keyword[:when], lazy_expr, operator[':'], lazy_expr) do |w,cond,t,val|
+    simple_case = sequence(keyword[:when], lazy_expr, operator[':'], lazy_expr) do |_,cond,_,val|
       [cond, val]
     end
-    full_case = sequence(keyword[:when], predicate, operator[':'], lazy_expr) do |w,cond,t,val|
+    full_case = sequence(keyword[:when], predicate, operator[':'], lazy_expr) do |_,cond,_,val|
       [cond, val]
     end
     default_case = (keyword[:else] >> lazy_expr).optional
     simple_when_then = sequence(lazy_expr, simple_case.many, default_case, 
-      keyword[:end]) do |val, cases, default|
+      keyword[:end]) do |val, cases, default, _|
       calculate_simple_cases(val, cases, default)
     end
-    full_when_then = sequence(full_case.many, default_case, keyword[:end]) do |cases, default|
+    full_when_then = sequence(full_case.many, default_case, keyword[:end]) do |cases, default, _|
       calculate_full_cases(cases, default)
     end
     case_expr = keyword[:case] >> (simple_when_then | full_when_then)
     wildcard = operator[:*] >> WildcardExpr::Instance
-    lit = token(:number, :string){|l|LiteralExpr.new l} | token(:var){|name|VarExpr.new name}
+    lit = token(:number, :string, &ctor(LiteralExpr)) | token(:var, &ctor(VarExpr))
     atom = lit | wildcard |
       sequence(word, operator['.'], word|wildcard) {|owner, _, col| QualifiedColumnExpr.new owner, col} |
-      word {|w|WordExpr.new w}
+      word(&ctor(WordExpr))
     term = atom | (operator['('] >> lazy_expr << operator[')']) | case_expr
     table = OperatorTable.new.
       infixl(operator['+'] >> Plus, 20).
@@ -183,16 +183,13 @@ module SqlParser
     end
     joined_relation = sub_relation.postfix(join_maker(lazy{joined_relation}, pred))
     where_clause = keyword[:where] >> pred
-    order_element = sequence(expr, (keyword[:asc] >> true | keyword[:desc] >> false).optional(true)) do |e,order|
-      OrderElement.new e, order
-    end
+    order_element = sequence(expr, (keyword[:asc] >> true | keyword[:desc] >> false).optional(true),
+      &ctor(OrderElement))
     order_elements = order_element.separated1(comma)
     exprs = expr.separated1(comma)
     order_by_clause = keyword[:order] >> keyword[:by] >> order_elements
     group_by = keyword[:group] >> keyword[:by] >> exprs
-    group_by_clause = sequence(group_by, (keyword[:having] >> pred).optional) do |by, having|
-      GroupByClause.new(by, having)
-    end
+    group_by_clause = sequence(group_by, (keyword[:having] >> pred).optional, &ctor(GroupByClause))
     relation = sub_relation | sequence(keyword[:select], 
       keyword[:distinct].optional(false), exprs, 
       keyword[:from], joined_relation,
@@ -211,9 +208,7 @@ module SqlParser
     end
   end
   def join_maker rel, pred
-    crossjoin = keyword[:cross] >> keyword[:join] >> rel.map do |r|
-      proc {|r0| CrossJoinRelation.new(r0, r)}
-    end
+    crossjoin = keyword[:cross] >> keyword[:join] >> rel.map(&rctor(CrossJoinRelation))
     leftjoin = outer_join :left
     rightjoin = outer_join :right
     fulljoin = outer_join :full

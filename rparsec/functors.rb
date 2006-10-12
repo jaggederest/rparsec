@@ -86,9 +86,10 @@ module FunctorMixin
   # i.e. closure.curry.call(a).call(b) is quivalent to closure.call(a,b) .
   # _self_ is encapsulated under the hood to perform the actual
   # job when currying is done.
+  # arity needs to be specified when treating a Method as proc as arity can be unknown.
   # 
-  def curry
-    FunctorMixin.make_curry(arity, &self)
+  def curry(ary=arity)
+    FunctorMixin.make_curry(ary, &self)
   end
   #
   # Create a Proc that's curriable.
@@ -96,15 +97,17 @@ module FunctorMixin
   # i.e. closure.reverse_curry.call(a).call(b) is quivalent to closure.call(b,a) .
   # _self_ is encapsulated under the hood to perform the actual
   # job when currying is done.
+  # arity needs to be specified when treating a Method as proc as arity can be unknown.
   # 
-  def reverse_curry
-    FunctorMixin.make_reverse_curry(arity, &self)
+  def reverse_curry(ary=arity)
+    FunctorMixin.make_reverse_curry(ary, &self)
   end
   #
   # Uncurry a curried closure.
+  # arity needs to be specified when treating a Method as proc as arity can be unknown.
   #
-  def uncurry
-    return self unless arity == 1
+  def uncurry(ary=arity)
+    return self unless ary == 1
     proc do |*args|
       result = self
       args.each do |a|
@@ -115,9 +118,10 @@ module FunctorMixin
   end
   #
   # Uncurry a reverse curried closure.
+  # arity needs to be specified when treating a Method as proc as arity can be unknown.
   # 
-  def reverse_uncurry
-    return self unless arity == 1
+  def reverse_uncurry(ary=arity)
+    return self unless ary == 1
     proc do |*args|
       result = self
       args.reverse_each do |a|

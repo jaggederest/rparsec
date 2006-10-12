@@ -90,3 +90,4 @@
 - Add AltParser that recovers regardless of input consumption. Change "|" to use AltParser.
 - Add Parsers.alt for AltParser.
 - setIndex
+- mapn
