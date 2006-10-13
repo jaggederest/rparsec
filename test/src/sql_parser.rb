@@ -116,7 +116,7 @@ module SqlParser
   end
   def make_comparison_predicate expr, rel
     comparison = sequence(Comparators, expr) do |op,e2|
-      proc{|val1|ComparePredicate.new(val1, op, e2)}
+      proc{|e1|ComparePredicate.new(e1, op, e2)}
     end
     in_clause = make_in expr
     not_in_clause = make_not_in expr
