@@ -661,7 +661,7 @@ module Parsers
         tok.respond_to? :kind, :text and kinds.include? tok.kind
       end
     end
-    recognizer = recognizer.map{|tok|proc.call(tok.text)} unless proc.nil?
+    recognizer = recognizer.map{|tok|proc.call(tok.text)} if proc
     recognizer
   end
   #
