@@ -26,6 +26,9 @@ module X
   def f1
     'x1'
   end
+  def method_missing n
+    puts "missing #{n}"
+  end
   F2 = 'F2'
   extend self
 end
@@ -35,4 +38,4 @@ puts X::F2
 puts X::F2
 include X
 puts F2
-#puts X.F2
+puts X.F2
