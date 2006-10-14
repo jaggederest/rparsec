@@ -1,7 +1,6 @@
 require 'benchmark'
 require 'strscan'
 
-require 'a'
 puts __FILE__
 str = ''
 N = 10
@@ -22,3 +21,18 @@ Benchmark.bm do |x|
   x.report("=~ with anchor") {N.times{ptn2 =~ str}}
   x.report("=~ without anchor") {N.times{ptn1 =~ str[N/2,N]}}
 end
+
+module X
+  def f1
+    'x1'
+  end
+  F2 = 'F2'
+  extend self
+end
+puts X::F2
+#puts X::f1
+#puts X.f1
+puts X::F2
+include X
+puts F2
+#puts X.F2
