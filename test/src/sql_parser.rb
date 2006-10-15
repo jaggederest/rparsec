@@ -66,12 +66,6 @@ module SqlParser
     ctor(cls).reverse_curry arity
   end
   ################################### predicate parser #############################
-  def calculate_simple_cases(val, cases, default)
-    SimpleCaseExpr.new(val, cases, default)
-  end
-  def calculate_full_cases(cases, default)
-    CaseExpr.new(cases, default)
-  end
   def logical_operator op
     proc{|a,b|CompoundPredicate.new(a,op,b)}
   end
@@ -138,6 +132,12 @@ module SqlParser
   end
   
   ################################ expression parser ###############################
+  def calculate_simple_cases(val, cases, default)
+    SimpleCaseExpr.new(val, cases, default)
+  end
+  def calculate_full_cases(cases, default)
+    CaseExpr.new(cases, default)
+  end
   def make_expression predicate, rel
     expr = nil
     lazy_expr = lazy{expr}
