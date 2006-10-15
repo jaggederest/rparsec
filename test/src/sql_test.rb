@@ -9,6 +9,9 @@ class SqlTestCase < ParserTestCase
   def verify_relation(code, expected)
     verify_sql(code, expected, relation)
   end
+  def verify_predicate(code, expected)
+    verify_sql(code, expected, predicate)
+  end
   def testSimpleExpression
     verify_sql('1+2+3', '((1 + 2) + 3)', expression)
   end
@@ -118,5 +121,8 @@ class SqlTestCase < ParserTestCase
   def testUnion
     verify_relation('select * from table1 where a=2 union select * from table2 where a=1',
       'select * from table1 where a = 2 union select * from table2 where a = 1')
+  end
+  def testAndOrNot
+    verify_predicate '1>1 or 1<=1 and not true', '(1 > 1 or (1 <= 1 and (not true)))'
   end
 end
