@@ -739,7 +739,7 @@ module Parsers
   # with any Parser object. It is rather an independent Parser object
   # that maps the _current_ parser result.
   ##
-  # parser1.mapn{|x|...} is equivalent to parser1 >> mapn{|x|...}
+  # parser1.mapn{|x,y|...} is equivalent to parser1 >> mapn{|x,y|...}
   #
   def mapn(&block)
     return one unless block
