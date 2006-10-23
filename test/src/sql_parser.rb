@@ -91,10 +91,10 @@ module SqlParser
     keyword[:not] >> keyword[:exists] >> rel.map(&ctor(NotExistsPredicate))
   end
   def make_in expr
-    keyword[:in] >> list(expr).map(&rctor(InPredicate))
+    keyword[:in] >> list(expr) >> map(&rctor(InPredicate))
   end
   def make_not_in expr
-    keyword[:not] >> keyword[:in] >> list(expr).map(&rctor(NotInPredicate))
+    keyword[:not] >> keyword[:in] >> list(expr) >> map(&rctor(NotInPredicate))
   end
   def make_in_relation rel
     keyword[:in] >> rel.map(&rctor(InRelationPredicate))
