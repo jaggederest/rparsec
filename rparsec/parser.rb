@@ -699,6 +699,17 @@ module Parsers
   def lazy(&block)
     LazyParser.new(block)
   end
+  #
+  # A parser that watches the current parser result without changing it.
+  # The following assert will succeed:
+  # char(?a) >> watch{|x|assert_equal(?a, x)}
+  # watch can also be used as a handy tool to print trace information,
+  # for example:
+  # some_parser >> watch {puts "some_parser succeeded."}
+  #
+  def watch(&block)
+    WatchParser.new(block)
+  end
   private
   #
   # characters considered white space.
