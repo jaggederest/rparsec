@@ -373,6 +373,14 @@ class SimpleParserTest < ParserTestCase
   def testMapn
     assertParser('abc', ?b, any.repeat(3).mapn{|a,b,c|c-b+a})
   end
+  def testWatch
+    i = nil
+    assertParser('abc', ?b, any.repeat_(2) >> watch{i=1});
+    assert_equal(1, i)
+    assertParser('abc', ?b, any.repeat_(2) >> 
+      watch{|x|assert_equal(?b, x)}
+    )
+  end
   def verifyTypeMismatch(mtd, n, expected, actual)
     begin
       yield

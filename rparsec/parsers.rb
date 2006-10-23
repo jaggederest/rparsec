@@ -436,6 +436,13 @@ class NestedParser < Parser
   end
 end
 
+class WatchParser < Parser
+  init :proc
+  def _parse ctxt
+    @proc.call(ctxt.result)
+    true
+  end
+end
 
 class Repeat_Parser < Parser
   init :parser, :times
