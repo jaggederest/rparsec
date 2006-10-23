@@ -443,7 +443,13 @@ class WatchParser < Parser
     true
   end
 end
-
+class MapCurrentParser < Parser
+  init :proc
+  def _parse ctxt
+    ctxt.result = @proc.call(ctxt.result)
+    true
+  end
+end
 class Repeat_Parser < Parser
   init :parser, :times
   def _parse ctxt

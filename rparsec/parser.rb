@@ -77,6 +77,7 @@ class Parser
   # (increment it in this case).
   #
   def map(&block)
+    return self unless block
     MapParser.new(self, block)
   end
   #
@@ -86,6 +87,7 @@ class Parser
   # as the parsing result.
   #
   def mapn(&block)
+    return self unless block
     MapnParser.new(self, block)
   end
   
@@ -711,7 +713,22 @@ module Parsers
   # some_parser >> watch {puts "some_parser succeeded."}
   #
   def watch(&block)
+    return one unless block
     WatchParser.new(block)
+  end
+  # 
+  # A parser that maps current parser result to a new result using
+  # the given block.
+  ##
+  # Different from Parser#map, this method does not need to be combined
+  # with any Parser object. It is rather an independent Parser object
+  # that maps the _current_ parser result.
+  ##
+  # parser1.map{|x|...} is equivalent to parser1 >> map{|x|...}
+  #
+  def map(&block)
+    return one unless block
+    MapCurrentParser.new(block)
   end
   private
   #
