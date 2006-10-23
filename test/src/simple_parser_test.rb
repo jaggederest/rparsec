@@ -382,11 +382,15 @@ class SimpleParserTest < ParserTestCase
     )
     assertParser('abc', ?b, any.repeat_(2) >> watch);
   end
-  def testMap
+  def testMapCurrent
     assertParser('abc', ?b, any >> map{|x|x+1})
     assertParser('abc', ?a, any >> map)
     assertParser('abc', ?a, any.map)
     assertParser('abc', ?a, any.mapn)
+  end
+  def testMapnCurrent
+    assertParser('abc', ?a, any.repeat(2) >> mapn{|a,_|a})
+    assertParser('abc', [?a,?b], any.repeat(2) >> mapn)
   end
   def verifyTypeMismatch(mtd, n, expected, actual)
     begin

@@ -730,6 +730,21 @@ module Parsers
     return one unless block
     MapCurrentParser.new(block)
   end
+  # 
+  # A parser that maps current parser result to a new result using
+  # the given block. If the current parser result is an array, the array
+  # elements are expanded and then passed as parameters to the block.
+  ##
+  # Different from Parser#mapn, this method does not need to be combined
+  # with any Parser object. It is rather an independent Parser object
+  # that maps the _current_ parser result.
+  ##
+  # parser1.mapn{|x|...} is equivalent to parser1 >> mapn{|x|...}
+  #
+  def mapn(&block)
+    return one unless block
+    MapnCurrentParser.new(block)
+  end
   private
   #
   # characters considered white space.

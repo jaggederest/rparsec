@@ -450,6 +450,13 @@ class MapCurrentParser < Parser
     true
   end
 end
+class MapnCurrentParser < Parser
+  init :proc
+  def _parse ctxt
+    ctxt.result = @proc.call(*ctxt.result)
+    true
+  end
+end
 class Repeat_Parser < Parser
   init :parser, :times
   def _parse ctxt
