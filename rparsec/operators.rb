@@ -1,19 +1,18 @@
 require 'rparsec/parser'
 
 #
-# starts_with is too useful to be missed in the standard String class.
-# We add a simple implementation for it.
+# utility functions for string manipulations.
 #
-class String
+module StringUtils
   #
   # Do I start with the sub string?
   # 
-  def starts_with? sub
+  def self.starts_with? str, sub
     return true if sub.nil?
     len = sub.length
-    return false if len > length
+    return false if len > str.length
     for i in (0...len)
-      return false if self[i] != sub[i]
+      return false if str[i] != sub[i]
     end
     true
   end
@@ -97,7 +96,7 @@ class Operators
     for i in (1..suite.length)
       ind = suite.length - i
       cur = suite[ind]
-      if cur.starts_with? s
+      if StringUtils.starts_with? cur, s
         suite.insert(ind+1, s) unless cur == s
         return true
       end
