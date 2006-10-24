@@ -242,7 +242,13 @@ class BoundParser < Parser
     @proc.call(ctxt.result)._parse ctxt
   end
 end
-
+class BoundnParser < Parser
+  init :parser, :proc
+  def _parse ctxt
+    return false unless @parser._parse(ctxt)
+    @proc.call(*ctxt.result)._parse ctxt
+  end
+end
 class MapParser < Parser
   init :parser, :proc
   def _parse ctxt
@@ -440,6 +446,13 @@ class WatchParser < Parser
   init :proc
   def _parse ctxt
     @proc.call(ctxt.result)
+    true
+  end
+end
+class WatchnParser < Parser
+  init :proc
+  def _parse ctxt
+    @proc.call(*ctxt.result)
     true
   end
 end

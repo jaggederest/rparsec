@@ -8,6 +8,7 @@ class ParserMonad
     ValueParser.new(v);
   end
   def bind(v, &proc)
+    return v unless proc
     BoundParser.new(v, proc);
   end
   def mplus(p1, p2)

@@ -42,6 +42,9 @@ class SimpleParserTest < ParserTestCase
     assertParser('', 3, value(1).bind do |a|
       value(2).bind{|b|value(a+b)}
     end)
+    assertParser('', 2, value(1).repeat(2).bindn do |a,b|
+      value(a+b)
+    end)
   end
   def testSum
     assertParser('', 1, sum(value(1), value(2), value(3)))
@@ -379,6 +382,12 @@ class SimpleParserTest < ParserTestCase
     assert_equal(1, i)
     assertParser('abc', ?b, any.repeat_(2) >> 
       watch{|x|assert_equal(?b, x)}
+    )
+    assertParser('abc', [?a,?b], any.repeat(2) >> 
+      watchn do |x,y|
+        assert_equal(?a, x)
+        assert_equal(?b, y)
+      end
     )
     assertParser('abc', ?b, any.repeat_(2) >> watch);
   end

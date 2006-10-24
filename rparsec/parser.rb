@@ -81,6 +81,17 @@ class Parser
     MapParser.new(self, block)
   end
   #
+  # _self_ is first executed, the parser result is then passed as parameter to the associated block,
+  # which evaluates to another Parser object at runtime. This new Parser object is then executed
+  # to get the final parser result.
+  ##
+  # Different from _bind_, parser result of _self_ will be expanded first if it is an array.
+  #
+  def bindn(&block)
+    return self unless block
+    BoundnParser.new(self, block)
+  end
+  #
   # a.mapn{|x,y|x+y} will first execute parser a, when it succeeds,
   # the array result (if any) is expanded and passed as parameters
   # to the associated block. The result of the block is then used
@@ -715,6 +726,19 @@ module Parsers
   def watch(&block)
     return one unless block
     WatchParser.new(block)
+  end
+  #
+  # A parser that watches the current parser result without changing it.
+  # The following assert will succeed:
+  ##
+  # char(?a).repeat(2) >> watchn{|x,y|assert_equal([?a,?a], [x,y])}
+  ##
+  # Slightly different from _watch_, _watchn_ expands the current parser result
+  # before passing it into the associated block.
+  #
+  def watchn(&block)
+    return one unless block
+    WatchnParser.new(block)
   end
   # 
   # A parser that maps current parser result to a new result using
