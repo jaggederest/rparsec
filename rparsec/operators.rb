@@ -5,7 +5,7 @@ require 'rparsec/parser'
 #
 module StringUtils
   #
-  # Do I start with the sub string?
+  # Does _str_ starts with the _sub_ string?
   # 
   def self.starts_with? str, sub
     return true if sub.nil?
