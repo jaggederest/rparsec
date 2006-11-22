@@ -46,10 +46,10 @@ class Keywords
     @symbol_map = {}
     word_map = {}
     words.each do |w|
-      symbol = :"#{keyword_symbol}:#{w}"
+      symbol = "#{keyword_symbol}:#{w}".to_sym
       word_map[w] = symbol
       parser = Parsers.token(symbol, &block)
-      @symbol_map[:"#{w}"] = parser
+      @symbol_map["#{w}".to_sym] = parser
       @name_map[w] = parser
     end
     @lexer = make_lexer(default_lexer, word_map)
