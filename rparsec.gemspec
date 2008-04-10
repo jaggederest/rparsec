@@ -1,5 +1,4 @@
 require 'rake'
-
 spec = Gem::Specification.new do |s|
   s.name = 'rparsec'
   s.version = '1.0'
