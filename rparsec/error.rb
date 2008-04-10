@@ -4,14 +4,17 @@ class ParserException < StandardError
   def_readable :index
 end
 class Failure
-  def initialize(ind, input, msg=nil)
-    @index, @input, @msg = ind, input, msg
+  def initialize(ind, input, message=nil)
+    @index, @input, @msg = ind, input, message
   end
+  
   attr_reader :index, :input
   attr_writer :index
+  
   def msg
     return @msg.to_s
   end
+  
   Precedence = 100
 end
 

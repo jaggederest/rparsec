@@ -4,13 +4,17 @@ require 'rparsec/misc'
 # This class represents a token during lexical analysis.
 #
 class Token
+  extend DefHelper
+  
   def_readable :kind, :text, :index
+  
   #
   # The length of the token.
   #
   def length
     @text.length
   end
+  
   #
   # String representation of the token.
   # 

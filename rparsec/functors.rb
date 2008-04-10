@@ -37,19 +37,20 @@ module Functors
   To_i = proc {|x|x.to_i}
   To_sym = proc {|x|x.to_sym}
   To_f = proc {|x|x.to_f}
+  
   #
   # Get a Proc, when called, always return the given value.
   # 
   def const(v)
     proc {|_|v}
   end
+  
   #
   # Get a Proc, when called, return the nth parameter.
   # 
   def nth(n)
     proc {|*args|args[n]}
   end
-  
 
   #
   # Create a Proc, which expects the two parameters
@@ -58,6 +59,7 @@ module Functors
   def flip(&block)
     proc {|x,y|block.call(y,x)}
   end
+  
   #
   # Create a Proc, when called, the parameter is
   # first passed into _f2_, _f1_ is called in turn
@@ -66,6 +68,7 @@ module Functors
   def compose(f1, f2)
     proc {|*x|f1.call(f2.call(*x))}
   end
+  
   #
   # Create a Proc that's curriable.
   # When curried, parameters are passed in from left to right.
@@ -78,6 +81,7 @@ module Functors
     fail "cannot curry for unknown arity" if arity < 0
     Functors.make_curry(arity, &block)
   end
+  
   #
   # Create a Proc that's curriable.
   # When curried, parameters are passed in from right to left.
@@ -90,6 +94,7 @@ module Functors
     fail "cannot curry for unknown arity" if arity < 0
     Functors.make_reverse_curry(arity, &block)
   end
+  
   #
   # Uncurry a curried closure.
   #
@@ -103,6 +108,7 @@ module Functors
       result
     end
   end
+  
   #
   # Uncurry a reverse curried closure.
   # 
@@ -116,6 +122,7 @@ module Functors
       result
     end
   end
+  
   #
   # Create a Proc, when called,
   # repeatedly call _block_ for _n_ times.
@@ -128,6 +135,7 @@ module Functors
       result
     end
   end
+  
   #
   # Create a Proc, when called,
   # repeatedly call _block_ for _n_ times.
@@ -143,8 +151,11 @@ module Functors
       result
     end
   end
+  
   extend self
+  
   private_class_method
+  
   def self.make_curry(arity, &block)
     return block if arity<=1
     proc do |x|
@@ -153,6 +164,7 @@ module Functors
       end
     end
   end
+  
   def self.make_reverse_curry(arity, &block)
     return block if arity <= 1
     proc do |x|
@@ -161,7 +173,6 @@ module Functors
       end
     end
   end
-  
   
 end
 
@@ -178,6 +189,7 @@ module FunctorMixin
   def flip
     Functors.flip(&self)
   end
+  
   #
   # Create a Proc, when called, the parameter is
   # first passed into _other_, _self_ is called in turn
@@ -186,13 +198,16 @@ module FunctorMixin
   def compose(other)
     Functors.compose(self, other)
   end
+  
   alias << compose
+  
   #
   # a >> b is equivalent to b << a
   # 
   def >> (other)
     other << self
   end
+  
   #
   # Create a Proc that's curriable.
   # When curried, parameters are passed in from left to right.
@@ -204,6 +219,7 @@ module FunctorMixin
   def curry(ary=arity)
     Functors.curry(ary, &self)
   end
+  
   #
   # Create a Proc that's curriable.
   # When curried, parameters are passed in from right to left.
@@ -215,18 +231,21 @@ module FunctorMixin
   def reverse_curry(ary=arity)
     Functors.reverse_curry(ary, &self)
   end
+  
   #
   # Uncurry a curried closure.
   #
   def uncurry
     Functors.uncurry(&self)
   end
+  
   #
   # Uncurry a reverse curried closure.
   # 
   def reverse_uncurry
     Functors.reverse_uncurry(&self)
   end
+  
   #
   # Create a Proc, when called,
   # repeatedly call _self_ for _n_ times.
@@ -236,6 +255,7 @@ module FunctorMixin
     Functors.repeat(n, &self)
   end
   #
+
   # Create a Proc, when called,
   # repeatedly call _self_ for _n_ times.
   # At each iteration, return value from the previous iteration
@@ -244,6 +264,7 @@ module FunctorMixin
   def power(n)
     Functors.power(n, &self)
   end
+  
   alias ** power
   alias * repeat
 end

@@ -2,8 +2,11 @@ require 'rparsec/misc'
 
 class CodeLocator
   extend DefHelper
+  
   def_readable :code
+  
   LF = ?\n
+  
   def locate(ind)
     return _locateEof if ind >= code.length
     line, col = 1,1
@@ -18,6 +21,7 @@ class CodeLocator
     end
     return line, col
   end
+  
   def _locateEof
     line, col = 1, 1
     code.each_byte do |c|

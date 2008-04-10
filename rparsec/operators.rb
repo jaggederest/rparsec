@@ -48,6 +48,7 @@ class Operators
     end
     @lexer = Parsers.sum(*lexers)
   end
+  
   #
   # Get the parser for the given operator.
   #
@@ -56,7 +57,9 @@ class Operators
     raise ArgumentError, "parser not found for #{op}" if result.nil?
     result
   end
+  
   alias [] parser
+  
   #
   # Get the lexer that lexes operators.
   # If an operator is specified, the lexer for that operator is returned.
@@ -65,6 +68,7 @@ class Operators
     return @lexer if op.nil?
     @lexers[op.to_sym]
   end
+  
   #
   # Sort an array of operators so that contained operator appears after containers.
   # When no containment exist between two operators, the shorter one takes precedence.
@@ -80,7 +84,9 @@ class Operators
     # suites are populated with bigger suite first
     to_array suites
   end
+  
   private
+  
   def self.populate_suites(suites, s)
     # populate the suites so that bigger suite first
     # this way we can use << operator for non-contained strings.
@@ -91,6 +97,7 @@ class Operators
     end
     suites << [s]
   end
+  
   def self.populate_suite(suite, s)
     # loop from the tail of the suite
     for i in (1..suite.length)
@@ -103,8 +110,8 @@ class Operators
     end
     false
   end
+  
   def self.to_array suites
-    result = []
     suites.reverse!.flatten!
   end
 end

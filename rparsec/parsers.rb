@@ -30,6 +30,7 @@ def add_error(err, e)
   err
   # merge_error(err, e)
 end
+
 def get_first_element(err)
   while err.kind_of?(Array)
     err = err[0]
@@ -43,6 +44,7 @@ def compare_error(e1, e2)
   return 1 if e1.index > e2.index
   0
 end
+
 ###############################################
 #def merge_error(e1, e2)
 #  return e1 << e2 if e1.kind_of?(Array)
@@ -55,6 +57,7 @@ class ThrowParser < Parser
     throw @symbol
   end
 end
+
 class CatchParser < Parser
   init :symbol, :parser
   def _parse ctxt
@@ -112,7 +115,6 @@ class LookAheadSensitiveParser < Parser
     NotParser.new(self, msg, @lookahead)
   end
 end
-
 
 class NotParser < LookAheadSensitiveParser
   def initialize(parser, msg, la=1)
@@ -242,6 +244,7 @@ class BoundParser < Parser
     @proc.call(ctxt.result)._parse ctxt
   end
 end
+
 class BoundnParser < Parser
   init :parser, :proc
   def _parse ctxt
@@ -249,6 +252,7 @@ class BoundnParser < Parser
     @proc.call(*ctxt.result)._parse ctxt
   end
 end
+
 class MapParser < Parser
   init :parser, :proc
   def _parse ctxt
@@ -312,6 +316,7 @@ class SatisfiesParser < Parser
     ctxt.retn elem
   end
 end
+
 class AnyParser < Parser
   def _parse ctxt
     return ctxt.expecting if ctxt.eof
@@ -328,6 +333,7 @@ class EofParser < Parser
     return ctxt.expecting(@msg)
   end
 end
+
 class RegexpParser < Parser
   init :ptn, :msg
   def _parse ctxt
@@ -341,6 +347,7 @@ class RegexpParser < Parser
     end
   end
 end
+
 class AreParser < Parser
   init :vals, :msg
   def _parse ctxt
@@ -359,7 +366,7 @@ class AreParser < Parser
 end
 
 def downcase c
-  case when c >= ?A && c <=?Z : c + (?a - ?A) else c end
+  case when c >= ?A && c <=?Z then c + (?a - ?A) else c end
 end
 
 class StringCaseInsensitiveParser < Parser
@@ -379,6 +386,7 @@ class StringCaseInsensitiveParser < Parser
     ctxt.retn result
   end
 end
+
 class FragmentParser < Parser
   init :parser
   def _parse ctxt
@@ -449,6 +457,7 @@ class WatchParser < Parser
     true
   end
 end
+
 class WatchnParser < Parser
   init :proc
   def _parse ctxt
@@ -456,6 +465,7 @@ class WatchnParser < Parser
     true
   end
 end
+
 class MapCurrentParser < Parser
   init :proc
   def _parse ctxt
@@ -463,6 +473,7 @@ class MapCurrentParser < Parser
     true
   end
 end
+
 class MapnCurrentParser < Parser
   init :proc
   def _parse ctxt
@@ -470,6 +481,7 @@ class MapnCurrentParser < Parser
     true
   end
 end
+
 class Repeat_Parser < Parser
   init :parser, :times
   def _parse ctxt
@@ -508,7 +520,6 @@ class Many_Parser < Parser
     end
   end
 end
-
 
 class ManyParser < Parser
   init :parser, :least
