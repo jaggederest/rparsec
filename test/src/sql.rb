@@ -1,5 +1,7 @@
 require 'import'
 import :misc
+
+include RParsec
 class Module
   include DefHelper
 end

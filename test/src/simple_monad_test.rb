@@ -2,6 +2,7 @@ require 'import'
 require 'runit/testcase'
 import :id_monad, :monad
 
+include RParsec
 class Idm
   include Monad
   MyMonad = IdMonad.new

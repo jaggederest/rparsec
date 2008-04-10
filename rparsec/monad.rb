@@ -1,3 +1,5 @@
+module RParsec
+  
 #
 # module for Monad
 #
@@ -56,3 +58,5 @@ module Monad
     @monad.mplus(@this, other.this)
   end
 end
+
+end # module

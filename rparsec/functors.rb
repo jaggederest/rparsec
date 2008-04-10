@@ -1,3 +1,5 @@
+module RParsec
+  
 #
 # This module provides frequently used functors.
 # 
@@ -268,3 +270,5 @@ module FunctorMixin
   alias ** power
   alias * repeat
 end
+
+end # module

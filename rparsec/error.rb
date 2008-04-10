@@ -1,4 +1,7 @@
 require 'rparsec/misc'
+
+module RParsec
+
 class ParserException < StandardError
   extend DefHelper
   def_readable :index
@@ -21,3 +24,5 @@ end
 class Expected < Failure
   Precedence = 100
 end
+
+end # module

@@ -1,5 +1,7 @@
 require 'rparsec/misc'
 
+module RParsec
+  
 class CodeLocator
   extend DefHelper
   
@@ -34,3 +36,5 @@ class CodeLocator
     return line, col
   end
 end
+
+end # module

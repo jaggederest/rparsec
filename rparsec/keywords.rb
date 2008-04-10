@@ -1,5 +1,7 @@
 require 'rparsec/parser'
 
+module RParsec
+  
 #
 # This class helps building lexers and parsers for keywords.
 # 
@@ -8,7 +10,15 @@ class Keywords
   
   private_class_method :new
   
-  attr_reader :keyword_symbol, :lexer
+  #
+  # The symbol used to identify a keyword token
+  #
+  attr_reader :keyword_symbol
+  
+  #
+  # The lexer that parses all the keywords represented
+  #
+  attr_reader :lexer
   
   #
   # Do we lex case sensitively?
@@ -100,3 +110,5 @@ class Keywords
     end
   end
 end
+
+end # module

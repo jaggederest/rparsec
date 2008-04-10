@@ -1,5 +1,7 @@
 require 'rparsec/parser'
 
+module RParsec
+  
 Associativities = [:prefix, :postfix, :infixn, :infixr, :infixl]
 #
 # This class holds information about operator precedences
@@ -178,3 +180,5 @@ module Expressions
     suites
   end
 end
+
+end # module

@@ -1,5 +1,7 @@
 require 'rparsec/parser'
 
+module RParsec
+
 class FailureParser < Parser
   init :msg
   def _parse ctxt
@@ -613,3 +615,5 @@ class SetIndexParser < Parser
 end
 
 Nil = ValueParser.new(nil)
+
+end # module

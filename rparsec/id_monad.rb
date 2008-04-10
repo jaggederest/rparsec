@@ -1,3 +1,5 @@
+module RParsec
+  
 class IdMonad
   def value v
     v
@@ -11,3 +13,5 @@ class IdMonad
     a
   end
 end
+
+end # module

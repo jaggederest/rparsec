@@ -3,7 +3,8 @@ monad misc error context locator token functors parser_monad
 }.each {|lib| require "rparsec/#{lib}"}
 require 'strscan'
 
-
+module RParsec
+  
 #
 # Represents a parser that parses a certain grammar rule.
 #
@@ -890,3 +891,4 @@ module Parsers
   extend self
 end
 
+end # module

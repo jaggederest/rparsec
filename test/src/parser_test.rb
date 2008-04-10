@@ -1,10 +1,10 @@
 require 'import'
 require 'rubyunit'
 import :parsers, :functors
-# require 'forwardable'
+
+include RParsec
 
 class ParserTestCase < RUNIT::TestCase
-  # extend Forwardable
   include Functors
   include Parsers
   def assertParser(code, expected, parser)

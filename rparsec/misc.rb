@@ -1,3 +1,23 @@
+module RParsec
+
+#
+# Internal utility functions for string manipulations.
+#
+module StringUtils
+  #
+  # Does _str_ starts with the _sub_ string?
+  # 
+  def self.starts_with? str, sub
+    return true if sub.nil?
+    len = sub.length
+    return false if len > str.length
+    for i in (0...len)
+      return false if str[i] != sub[i]
+    end
+    true
+  end
+end
+
 #
 # Helpers for defining ctor.
 #
@@ -107,3 +127,4 @@ module Signature
   end
 end
 
+end # module

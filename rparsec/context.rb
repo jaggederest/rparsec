@@ -1,4 +1,4 @@
-
+module RParsec
 
 class ParseContext
   attr_reader :error, :src, :index, :result
@@ -79,3 +79,5 @@ class ParseContext
     current
   end
 end
+
+end # module

@@ -1,4 +1,5 @@
-# require 'rparsec/parser_impls'
+module RParsec
+  
 class ParserMonad
   def fail msg
     FailureParser.new(msg)
@@ -18,3 +19,5 @@ class ParserMonad
     PlusParser.new([p1,p2]);
   end
 end
+
+end # module

@@ -2,7 +2,7 @@ require 'import'
 require 'runit/testcase'
 import :parsers, :functors
 
-
+include RParsec
 class Proc
   include FunctorMixin
 end
