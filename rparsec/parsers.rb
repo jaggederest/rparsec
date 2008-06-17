@@ -23,28 +23,32 @@ class LazyParser < Parser
   end
 end
 
-def add_error(err, e)
-  return e if err.nil?
-  return err if e.nil?
-  cmp = compare_error(err, e)
-  return err if cmp > 0
-  return e if cmp < 0
-  err
-  # merge_error(err, e)
-end
-
-def get_first_element(err)
-  while err.kind_of?(Array)
-    err = err[0]
+class Failures
+  def self.add_error(err, e)
+    return e if err.nil?
+    return err if e.nil?
+    cmp = compare_error(err, e)
+    return err if cmp > 0
+    return e if cmp < 0
+    err
+    # merge_error(err, e)
   end
-  err
-end
+  
+  private
+  
+  def self.get_first_element(err)
+    while err.kind_of?(Array)
+      err = err[0]
+    end
+    err
+  end
 
-def compare_error(e1, e2)
-  e1, e2 = get_first_element(e1), get_first_element(e2)
-  return -1 if e1.index < e2.index
-  return 1 if e1.index > e2.index
-  0
+  def self.compare_error(e1, e2)
+    e1, e2 = get_first_element(e1), get_first_element(e2)
+    return -1 if e1.index < e2.index
+    return 1 if e1.index > e2.index
+    0
+  end
 end
 
 ###############################################
@@ -165,7 +169,7 @@ class PlusParser < LookAheadSensitiveParser
       ctxt.index, ctxt.result = ind, result
       return true if p._parse(ctxt)
       return false unless visible(ctxt, ind)
-      err = add_error(err, ctxt.error)
+      err = Failures.add_error(err, ctxt.error)
     end
     ctxt.error = err
     return false
@@ -226,7 +230,7 @@ class BestParser < Parser
         if ctxt.error.index > err_pos
           err_ind, err_pos = ctxt.index, ctxt.error.index
         end
-        err = add_error(err, ctxt.error)
+        err = Failures.add_error(err, ctxt.error)
       end
     end
     if best_ind >= 0
