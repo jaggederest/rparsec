@@ -878,7 +878,7 @@ module Parsers
   end
   
   def as_num c
-    case c when String: c[0] else c end
+    case c when String then c[0] else c end
   end
   
   def as_list vals
